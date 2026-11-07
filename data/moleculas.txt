@@ -1,0 +1,219 @@
+# Biblioteca de moléculas de WEX MolForge Pro
+# Una molécula por línea:  Categoría|Nombre|SMILES|Fórmula|CID de PubChem (opcional)
+# - SMILES en forma Kekulé: anillos aromáticos con dobles enlaces explícitos (C1=CC=CC=C1, no c1ccccc1).
+# - Sin cargas ni estereoquímica. Los hidrógenos se completan solos.
+# - La fórmula se usa para validar la estructura (el CI rechaza líneas donde no coincide).
+# - Categorías existentes: Esenciales, Fármacos, Neurotransmisores, Aminoácidos, Aromáticos, Inorgánicos,
+#   Hidrocarburos, Naturales, Vitaminas, Azúcares y lípidos, Nucleótidos, Polímeros.
+Inorgánicos|Hidrógeno|[H][H]|H2|783
+Inorgánicos|Oxígeno|O=O|O2|977
+Inorgánicos|Nitrógeno|N#N|N2|947
+Inorgánicos|Flúor|FF|F2|24524
+Inorgánicos|Cloro|ClCl|Cl2|24526
+Inorgánicos|Bromo|BrBr|Br2|24408
+Inorgánicos|Yodo|II|I2|807
+Inorgánicos|Helio|[He]|He|23987
+Inorgánicos|Neón|[Ne]|Ne|24046
+Inorgánicos|Argón|[Ar]|Ar|23968
+Inorgánicos|Xenón|[Xe]|Xe|23991
+Inorgánicos|Dióxido de carbono|O=C=O|CO2|280
+Inorgánicos|Amoníaco|N|NH3|222
+Inorgánicos|Peróxido de hidrógeno|OO|H2O2|784
+Inorgánicos|Sulfuro de hidrógeno|S|H2S|402
+Inorgánicos|Cloruro de hidrógeno|Cl|HCl|313
+Inorgánicos|Dióxido de azufre|O=S=O|SO2|1119
+Inorgánicos|Trióxido de azufre|O=S(=O)=O|SO3|24682
+Inorgánicos|Ácido sulfúrico|OS(=O)(=O)O|H2SO4|1118
+Inorgánicos|Ácido nítrico|ON(=O)=O|HNO3|944
+Inorgánicos|Ácido fosfórico|OP(=O)(O)O|H3PO4|1004
+Inorgánicos|Ácido bórico|OB(O)O|H3BO3|7628
+Inorgánicos|Cloruro de sodio|[Na]Cl|NaCl|5234
+Inorgánicos|Hidróxido de sodio|[Na]O|NaOH|14798
+Inorgánicos|Cloruro de potasio|[K]Cl|KCl|4873
+Inorgánicos|Fluoruro de litio|[Li]F|LiF
+Inorgánicos|Carbonato de calcio|[Ca]1OC(=O)O1|CaCO3|10112
+Inorgánicos|Hidróxido de calcio|O[Ca]O|CaH2O2|14777
+Inorgánicos|Óxido de magnesio|[Mg]=O|MgO|14792
+Inorgánicos|Cloruro de magnesio|Cl[Mg]Cl|MgCl2
+Inorgánicos|Cloruro de aluminio|Cl[Al](Cl)Cl|AlCl3|24012
+Inorgánicos|Cloruro de hierro(II)|Cl[Fe]Cl|FeCl2
+Inorgánicos|Cloruro de zinc|Cl[Zn]Cl|ZnCl2
+Inorgánicos|Cloruro de cobre(II)|Cl[Cu]Cl|CuCl2
+Inorgánicos|Cianuro de hidrógeno|C#N|HCN|768
+Inorgánicos|Óxido nitroso|N#N=O|N2O|948
+Inorgánicos|Dióxido de nitrógeno|O=N=O|NO2
+Inorgánicos|Silano|[Si]|SiH4|23953
+Inorgánicos|Borano|[B]|BH3
+Inorgánicos|Arsina|[As]|AsH3
+Inorgánicos|Seleniuro de hidrógeno|[Se]|H2Se
+Inorgánicos|Tetracloruro de silicio|Cl[Si](Cl)(Cl)Cl|SiCl4
+Inorgánicos|Trifluoruro de boro|FB(F)F|BF3|6356
+Inorgánicos|Tricloruro de fósforo|ClP(Cl)Cl|PCl3|24387
+Inorgánicos|Pentacloruro de fósforo|ClP(Cl)(Cl)(Cl)Cl|PCl5
+Inorgánicos|Hexafluoruro de azufre|FS(F)(F)(F)(F)F|SF6|17358
+Inorgánicos|Tetracloruro de carbono|ClC(Cl)(Cl)Cl|CCl4|5943
+Inorgánicos|Triclorometano (cloroformo)|ClC(Cl)Cl|CHCl3|6212
+Inorgánicos|Diclorometano|ClCCl|CH2Cl2|6344
+Hidrocarburos|Etano|CC|C2H6|6324
+Hidrocarburos|Propano|CCC|C3H8|6334
+Hidrocarburos|Butano|CCCC|C4H10|7843
+Hidrocarburos|Isobutano|CC(C)C|C4H10|6360
+Hidrocarburos|Pentano|CCCCC|C5H12|8003
+Hidrocarburos|Hexano|CCCCCC|C6H14|8058
+Hidrocarburos|Heptano|CCCCCCC|C7H16|8900
+Hidrocarburos|Octano|CCCCCCCC|C8H18|356
+Hidrocarburos|Etileno|C=C|C2H4|6325
+Hidrocarburos|Propeno|CC=C|C3H6|8252
+Hidrocarburos|1,3-Butadieno|C=CC=C|C4H6|7845
+Hidrocarburos|Isopreno|CC(=C)C=C|C5H8|6557
+Hidrocarburos|Acetileno|C#C|C2H2|6326
+Hidrocarburos|Propino|CC#C|C3H4|6335
+Hidrocarburos|Ciclopropano|C1CC1|C3H6|6351
+Hidrocarburos|Ciclobutano|C1CCC1|C4H8|9250
+Hidrocarburos|Ciclopentano|C1CCCC1|C5H10|9253
+Hidrocarburos|Ciclohexano|C1CCCCC1|C6H12|8078
+Hidrocarburos|Ciclohexeno|C1=CCCCC1|C6H10|8079
+Hidrocarburos|Norbornano|C1CC2CCC1C2|C7H12
+Hidrocarburos|Adamantano|C1C2CC3CC1CC(C2)C3|C10H16|9238
+Aromáticos|Estireno|C=CC1=CC=CC=C1|C8H8|7501
+Aromáticos|o-Xileno|CC1=CC=CC=C1C|C8H10|7237
+Aromáticos|Naftaleno|C1=CC2=CC=CC=C2C=C1|C10H8|931
+Aromáticos|Antraceno|C1=CC=C2C=C3C=CC=CC3=CC2=C1|C14H10|8418
+Aromáticos|Fenantreno|C1=CC=C2C(=C1)C=CC3=CC=CC=C32|C14H10|995
+Aromáticos|Bifenilo|C1=CC=C(C=C1)C2=CC=CC=C2|C12H10|7095
+Aromáticos|Pireno|C1=CC2=C3C(=C1)C=CC4=CC=CC(=C43)C=C2|C16H10|31423
+Aromáticos|Fenol|OC1=CC=CC=C1|C6H6O|996
+Aromáticos|Anilina|NC1=CC=CC=C1|C6H7N|6115
+Aromáticos|Nitrobenceno|O=N(=O)C1=CC=CC=C1|C6H5NO2|7416
+Aromáticos|Clorobenceno|ClC1=CC=CC=C1|C6H5Cl|7964
+Aromáticos|Bromobenceno|BrC1=CC=CC=C1|C6H5Br|7961
+Aromáticos|Fluorobenceno|FC1=CC=CC=C1|C6H5F|10008
+Aromáticos|Benzaldehído|O=CC1=CC=CC=C1|C7H6O|240
+Aromáticos|Ácido benzoico|OC(=O)C1=CC=CC=C1|C7H6O2|243
+Aromáticos|Ácido salicílico|OC(=O)C1=CC=CC=C1O|C7H6O3|338
+Aromáticos|Piridina|C1=CC=NC=C1|C5H5N|1049
+Aromáticos|Pirrol|C1=CNC=C1|C4H5N|8027
+Aromáticos|Furano|C1=COC=C1|C4H4O|8029
+Aromáticos|Tiofeno|C1=CSC=C1|C4H4S|8030
+Aromáticos|Imidazol|C1=CN=CN1|C3H4N2|795
+Aromáticos|Indol|C1=CC=C2C(=C1)C=CN2|C8H7N|798
+Aromáticos|Quinolina|C1=CC=C2C(=C1)C=CC=N2|C9H7N|7047
+Esenciales|Metanol|CO|CH4O|887
+Esenciales|Propan-1-ol|CCCO|C3H8O|1031
+Esenciales|Isopropanol|CC(C)O|C3H8O|3776
+Esenciales|Butan-1-ol|CCCCO|C4H10O|263
+Esenciales|Etilenglicol|OCCO|C2H6O2|174
+Esenciales|Glicerol|OCC(O)CO|C3H8O3|753
+Esenciales|Formaldehído|C=O|CH2O|712
+Esenciales|Acetaldehído|CC=O|C2H4O|177
+Esenciales|Acetona|CC(C)=O|C3H6O|180
+Esenciales|Butanona|CCC(C)=O|C4H8O|6569
+Esenciales|Ciclohexanona|O=C1CCCCC1|C6H10O|7967
+Esenciales|Éter dietílico|CCOCC|C4H10O|3283
+Esenciales|Tetrahidrofurano|C1CCOC1|C4H8O|8028
+Esenciales|1,4-Dioxano|C1COCCO1|C4H8O2|31275
+Esenciales|Ácido fórmico|OC=O|CH2O2|284
+Esenciales|Ácido propiónico|CCC(O)=O|C3H6O2|1032
+Esenciales|Ácido butírico|CCCC(O)=O|C4H8O2|264
+Esenciales|Ácido oxálico|OC(=O)C(O)=O|C2H2O4|971
+Esenciales|Ácido láctico|CC(O)C(O)=O|C3H6O3|612
+Esenciales|Ácido cítrico|OC(=O)CC(O)(CC(O)=O)C(O)=O|C6H8O7|311
+Esenciales|Ácido succínico|OC(=O)CCC(O)=O|C4H6O4|1110
+Esenciales|Ácido málico|OC(=O)CC(O)C(O)=O|C4H6O5|525
+Esenciales|Ácido pirúvico|CC(=O)C(O)=O|C3H4O3|1060
+Esenciales|Acetato de etilo|CCOC(C)=O|C4H8O2|8857
+Esenciales|Anhídrido acético|CC(=O)OC(C)=O|C4H6O3|7918
+Esenciales|Urea|NC(N)=O|CH4N2O|1176
+Esenciales|Acetamida|CC(N)=O|C2H5NO|178
+Esenciales|Dimetilformamida|CN(C)C=O|C3H7NO|6228
+Esenciales|Dimetilsulfóxido|CS(C)=O|C2H6OS|679
+Esenciales|Acetonitrilo|CC#N|C2H3N|6342
+Esenciales|Metilamina|CN|CH5N|6329
+Esenciales|Dimetilamina|CNC|C2H7N|674
+Esenciales|Trimetilamina|CN(C)C|C3H9N|1146
+Aminoácidos|L-Valina|CC(C)C(N)C(O)=O|C5H11NO2|6287
+Aminoácidos|L-Leucina|CC(C)CC(N)C(O)=O|C6H13NO2|6106
+Aminoácidos|L-Isoleucina|CCC(C)C(N)C(O)=O|C6H13NO2|6306
+Aminoácidos|L-Prolina|OC(=O)C1CCCN1|C5H9NO2|145742
+Aminoácidos|L-Fenilalanina|NC(CC1=CC=CC=C1)C(O)=O|C9H11NO2|6140
+Aminoácidos|L-Triptófano|NC(CC1=CNC2=CC=CC=C12)C(O)=O|C11H12N2O2|6305
+Aminoácidos|L-Metionina|CSCCC(N)C(O)=O|C5H11NO2S|6137
+Aminoácidos|L-Serina|NC(CO)C(O)=O|C3H7NO3|5951
+Aminoácidos|L-Treonina|CC(O)C(N)C(O)=O|C4H9NO3|6288
+Aminoácidos|L-Cisteína|NC(CS)C(O)=O|C3H7NO2S|5862
+Aminoácidos|L-Tirosina|NC(CC1=CC=C(O)C=C1)C(O)=O|C9H11NO3|6057
+Aminoácidos|L-Asparagina|NC(CC(N)=O)C(O)=O|C4H8N2O3|6267
+Aminoácidos|L-Glutamina|NC(CCC(N)=O)C(O)=O|C5H10N2O3|5961
+Aminoácidos|Ácido L-aspártico|NC(CC(O)=O)C(O)=O|C4H7NO4|5960
+Aminoácidos|Ácido L-glutámico|NC(CCC(O)=O)C(O)=O|C5H9NO4|33032
+Aminoácidos|L-Lisina|NCCCCC(N)C(O)=O|C6H14N2O2|5962
+Aminoácidos|L-Arginina|NC(CCCNC(N)=N)C(O)=O|C6H14N4O2|6322
+Aminoácidos|L-Histidina|NC(CC1=CN=CN1)C(O)=O|C6H9N3O2|6274
+Neurotransmisores|Noradrenalina|NCC(O)C1=CC(O)=C(O)C=C1|C8H11NO3|439260
+Neurotransmisores|Adrenalina|CNCC(O)C1=CC(O)=C(O)C=C1|C9H13NO3|5816
+Neurotransmisores|GABA|NCCCC(O)=O|C4H9NO2|119
+Neurotransmisores|Histamina|NCCC1=CN=CN1|C5H9N3|774
+Neurotransmisores|Melatonina|COC1=CC2=C(C=C1)NC=C2CCNC(C)=O|C13H16N2O2|896
+Neurotransmisores|Testosterona|CC12CCC3C(CCC4=CC(=O)CCC34C)C1CCC2O|C19H28O2|6013
+Neurotransmisores|Estradiol|CC12CCC3C(C1CCC2O)CCC4=C3C=CC(O)=C4|C18H24O2|5757
+Neurotransmisores|Progesterona|CC(=O)C1CCC2C1(C)CCC3C2CCC4=CC(=O)CCC34C|C21H30O2|5994
+Neurotransmisores|Cortisol|CC12CCC(=O)C=C1CCC3C2C(O)CC4(C)C3CCC4(O)C(=O)CO|C21H30O5|5754
+Neurotransmisores|Colesterol|CC(C)CCCC(C)C1CCC2C1(C)CCC3C2CC=C4CC(O)CCC34C|C27H46O|5997
+Fármacos|Nicotina|CN1CCCC1C2=CN=CC=C2|C10H14N2|89594
+Fármacos|Teobromina|CN1C=NC2=C1C(=O)NC(=O)N2C|C7H8N4O2|5429
+Fármacos|Teofilina|CN1C2=C(NC=N2)C(=O)N(C)C1=O|C7H8N4O2|2153
+Fármacos|Naproxeno|COC1=CC2=C(C=C1)C=C(C=C2)C(C)C(O)=O|C14H14O3|156391
+Fármacos|Diclofenaco|OC(=O)CC1=CC=CC=C1NC2=C(Cl)C=CC=C2Cl|C14H11Cl2NO2|3033
+Fármacos|Penicilina G|CC1(C)SC2C(NC(=O)CC3=CC=CC=C3)C(=O)N2C1C(O)=O|C16H18N2O4S|5904
+Fármacos|Amoxicilina|CC1(C)SC2C(NC(=O)C(N)C3=CC=C(O)C=C3)C(=O)N2C1C(O)=O|C16H19N3O5S|33613
+Fármacos|Metformina|CN(C)C(=N)NC(N)=N|C4H11N5|4091
+Fármacos|Morfina|CN1CCC23C4C1CC5=C2C(=C(C=C5)O)OC3C(C=C4)O|C17H19NO3|5288826
+Fármacos|Fluoxetina|CNCCC(OC1=CC=C(C=C1)C(F)(F)F)C2=CC=CC=C2|C17H18F3NO|3386
+Fármacos|Diazepam|CN1C(=O)CN=C(C2=CC=CC=C2)C3=C1C=CC(Cl)=C3|C16H13ClN2O|3016
+Fármacos|Warfarina|CC(=O)CC(C1=CC=CC=C1)C2=C(O)C3=CC=CC=C3OC2=O|C19H16O4|54678486
+Fármacos|Lidocaína|CCN(CC)CC(=O)NC1=C(C)C=CC=C1C|C14H22N2O|3676
+Fármacos|Propranolol|CC(C)NCC(O)COC1=CC=CC2=C1C=CC=C2|C16H21NO2|4946
+Fármacos|Quinina|COC1=CC2=C(C=C1)N=CC=C2C(O)C3CC4CCN3CC4C=C|C20H24N2O2|3034034
+Fármacos|Atropina|CN1C2CCC1CC(C2)OC(=O)C(CO)C3=CC=CC=C3|C17H23NO3|174174
+Fármacos|DEET|CCN(CC)C(=O)C1=CC=CC(C)=C1|C12H17NO|4284
+Fármacos|Bisfenol A|CC(C)(C1=CC=C(O)C=C1)C2=CC=C(O)C=C2|C15H16O2|6623
+Naturales|Mentol|CC(C)C1CCC(C)CC1O|C10H20O|1254
+Naturales|Vainillina|COC1=C(O)C=CC(C=O)=C1|C8H8O3|1183
+Naturales|Limoneno|CC1=CCC(CC1)C(C)=C|C10H16|22311
+Naturales|Cinamaldehído|O=CC=CC1=CC=CC=C1|C9H8O|637511
+Naturales|Eugenol|COC1=C(O)C=CC(CC=C)=C1|C10H12O2|3314
+Naturales|Capsaicina|COC1=C(O)C=CC(CNC(=O)CCCCC=CC(C)C)=C1|C18H27NO3|1548943
+Naturales|Resveratrol|OC1=CC=C(C=CC2=CC(O)=CC(O)=C2)C=C1|C14H12O3|445154
+Naturales|Quercetina|OC1=CC(O)=C2C(=O)C(O)=C(OC2=C1)C3=CC(O)=C(O)C=C3|C15H10O7|5280343
+Vitaminas|Vitamina C|OCC(O)C1OC(=O)C(O)=C1O|C6H8O6|54670067
+Vitaminas|Niacina (B3)|OC(=O)C1=CC=CN=C1|C6H5NO2|938
+Vitaminas|Biotina (B7)|OC(=O)CCCCC1SCC2NC(=O)NC12|C10H16N2O3S|171548
+Vitaminas|Piridoxina (B6)|CC1=NC=C(CO)C(CO)=C1O|C8H11NO3|1054
+Vitaminas|Ácido pantoténico (B5)|CC(C)(CO)C(O)C(=O)NCCC(O)=O|C9H17NO5|6613
+Vitaminas|Retinol (A)|CC1=C(C=CC(C)=CC=CC(C)=CCO)C(C)(C)CCC1|C20H30O|445354
+Vitaminas|Vitamina D3|CC(C)CCCC(C)C1CCC2C1(C)CCCC2=CC=C3CC(O)CCC3=C|C27H44O|5280795
+Azúcares y lípidos|Glucosa|OCC1OC(O)C(O)C(O)C1O|C6H12O6|5793
+Azúcares y lípidos|Fructosa|OCC1(O)OCC(O)C(O)C1O|C6H12O6|5984
+Azúcares y lípidos|Ribosa|OCC1OC(O)C(O)C1O|C5H10O5|5779
+Azúcares y lípidos|Sacarosa|OCC1OC(CO)(OC2OC(CO)C(O)C(O)C2O)C(O)C1O|C12H22O11|5988
+Azúcares y lípidos|Ácido láurico|CCCCCCCCCCCC(O)=O|C12H24O2|3893
+Azúcares y lípidos|Ácido palmítico|CCCCCCCCCCCCCCCC(O)=O|C16H32O2|985
+Azúcares y lípidos|Ácido esteárico|CCCCCCCCCCCCCCCCCC(O)=O|C18H36O2|5281
+Azúcares y lípidos|Ácido oleico|CCCCCCCCC=CCCCCCCCC(O)=O|C18H34O2|445639
+Azúcares y lípidos|Ácido linoleico|CCCCCC=CCC=CCCCCCCCC(O)=O|C18H32O2|5280450
+Azúcares y lípidos|Ácido docosahexaenoico (DHA)|CCC=CCC=CCC=CCC=CCC=CCC=CCCC(O)=O|C22H32O2|445580
+Nucleótidos|Adenina|NC1=C2NC=NC2=NC=N1|C5H5N5|190
+Nucleótidos|Guanina|NC1=NC2=C(NC=N2)C(=O)N1|C5H5N5O|764
+Nucleótidos|Citosina|NC1=NC(=O)NC=C1|C4H5N3O|597
+Nucleótidos|Timina|CC1=CNC(=O)NC1=O|C5H6N2O2|1135
+Nucleótidos|Uracilo|O=C1C=CNC(=O)N1|C4H4N2O2|1174
+Nucleótidos|Adenosina|NC1=C2N=CN(C3OC(CO)C(O)C3O)C2=NC=N1|C10H13N5O4|60961
+Nucleótidos|ATP|NC1=C2N=CN(C3OC(COP(O)(=O)OP(O)(=O)OP(O)(O)=O)C(O)C3O)C2=NC=N1|C10H16N5O13P3|5957
+Polímeros|Cloruro de vinilo|C=CCl|C2H3Cl|6338
+Polímeros|Ácido acrílico|C=CC(O)=O|C3H4O2|6581
+Polímeros|Acrilonitrilo|C=CC#N|C3H3N|7855
+Polímeros|Metacrilato de metilo|COC(=O)C(C)=C|C5H8O2|6658
+Polímeros|Tetrafluoroetileno|FC(F)=C(F)F|C2F4|8301
+Polímeros|Ácido tereftálico|OC(=O)C1=CC=C(C=C1)C(O)=O|C8H6O4|7489
+Polímeros|Caprolactama|O=C1CCCCCN1|C6H11NO|7768
+Polímeros|Lactida|CC1OC(=O)C(C)OC1=O|C6H8O4

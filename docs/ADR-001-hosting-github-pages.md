@@ -61,3 +61,8 @@ Consecuencia: si se renombra el repositorio, hay que repetir el parche con el nu
 - Verificación: cada estructura se comprobó contra su fórmula molecular y su geometría 3D se calculó sin errores.
 - Offline: service worker (`sw.js`) + `manifest.webmanifest` (app instalable) y servidor local opcional (`servidor.py`).
 - Límite: los CID de PubChem de las moléculas nuevas provienen de memoria y no se verificaron en línea; las que no tienen CID enlazan a una búsqueda por nombre.
+
+## Actualización v4 (v0.4 beta): temas y colaboración
+- Temas por capa externa (`wex-v04.css/js`): variables CSS por `html[data-wex-theme]`, sin tocar el código compilado. Solo hay un momento animado de entrada (inicio) más la transición de tema, que responde a la acción del usuario; todo respeta «reducir movimiento».
+- Colaboración: la biblioteca se genera desde `data/moleculas.txt` con `tools/build_biblioteca.py`; GitHub Actions valida en Pull Requests y reconstruye al unir a `main`.
+- Límite: la lógica de Forja y Biblioteca sigue sin poder modificarse hasta recuperar el código fuente.
