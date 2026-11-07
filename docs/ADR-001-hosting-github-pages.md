@@ -55,3 +55,9 @@ A da independencia inmediata con el menor esfuerzo; B es la mejor a largo plazo 
 ## Actualización v2 (2026-11-06)
 El propietario quiere conservar el nombre `Molforge-pro`. Como el build original asume la raíz `/`, se parcheó el bundle para la subruta `/Molforge-pro`: (1) `basepath` del router, (2) prefijo del cargador de módulos y del favicon en `index-BZHH0yOC.js`, (3) rutas `/assets/` y `href="/..."` en `index.html` y `404.html`.
 Consecuencia: si se renombra el repositorio, hay que repetir el parche con el nuevo nombre. Con el código fuente, la solución limpia es configurar `base` de Vite y `basepath` del router.
+
+## Actualización v3: biblioteca ampliada y modo offline
+- Biblioteca: 14 → 226 moléculas, 5 → 12 categorías, 10 → 28 elementos (B, Si, Se, As, Li, Na, K, Mg, Ca, Al, Zn, Fe, Cu, He, Ne, Ar, Kr, Xe). Datos en `assets/fixtures-*.js` (cada molécula es una lista de átomos y enlaces; la geometría 3D se calcula en el navegador).
+- Verificación: cada estructura se comprobó contra su fórmula molecular y su geometría 3D se calculó sin errores.
+- Offline: service worker (`sw.js`) + `manifest.webmanifest` (app instalable) y servidor local opcional (`servidor.py`).
+- Límite: los CID de PubChem de las moléculas nuevas provienen de memoria y no se verificaron en línea; las que no tienen CID enlazan a una búsqueda por nombre.
