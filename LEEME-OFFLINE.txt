@@ -1,16 +1,12 @@
 WEX MolForge Pro SIN INTERNET
 
-MAC: doble clic en "iniciar-offline.command". Si macOS lo bloquea: clic derecho > Abrir > Abrir.
-     (Necesita Python 3; si no lo tienes, macOS ofrece instalarlo.)
-WINDOWS: doble clic en "iniciar-offline.bat" (necesita Python 3 de python.org).
-Se abre el navegador en http://localhost:8000/Molforge-pro/ . Deja la ventana abierta mientras lo uses.
-
-TELEFONO / TABLET / PC (instalar como app): abre https://wexyt.github.io/Molforge-pro/ UNA vez con internet.
- - Android (Chrome): menu ⋮ > "Instalar app".
+COMO APP (celular, tablet o PC) — abre la página publicada UNA vez con internet:
+ - Android (Chrome): menú ⋮ > "Instalar app"  (o Ajustes dentro de la app > "Instalar como app").
  - iPhone/iPad (Safari): Compartir > "Agregar a pantalla de inicio".
  - Mac (Safari): Archivo > "Agregar al Dock".
- - Chrome en PC: icono de instalar en la barra de direcciones.
-Despues funciona sin conexion.
+Después funciona sin conexión: biblioteca, editor, descargas y temas. Solo PubChem necesita internet.
 
-IMPORTANTE: la carpeta debe incluir assets/forja-*.js, biblioteca-*.js y external-link-*.js
-(se obtienen con "Code > Download ZIP" de tu repositorio).
+DESDE UNA CARPETA (computadora):
+ - Mac: doble clic en "iniciar-offline.command" (si macOS lo bloquea: clic derecho > Abrir).
+ - Windows: doble clic en "iniciar-offline.bat".
+ Necesita Python 3. Se abre http://localhost:8000/ ; deja la ventana abierta mientras lo uses.

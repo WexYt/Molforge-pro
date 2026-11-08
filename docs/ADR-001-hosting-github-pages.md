@@ -1,6 +1,6 @@
 # ADR-001: Alojar WEX MolForge Pro en GitHub Pages (sitio de usuario)
 
-**Status:** Accepted (v2: subruta /Molforge-pro/)
+**Status:** Superseded by ADR-002
 **Date:** 2026-11-06
 **Deciders:** WEX (propietario)
 

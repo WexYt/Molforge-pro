@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Reconstruye la biblioteca de moléculas a partir de data/moleculas.txt.
-  python3 tools/build_biblioteca.py             -> valida y regenera assets/fixtures-*.js
-  python3 tools/build_biblioteca.py --validate  -> solo valida
+"""Valida data/moleculas.txt y genera assets/biblioteca.json.
+  python3 tools/build_biblioteca.py            -> valida y genera
+  python3 tools/build_biblioteca.py --validate -> solo valida
 """
 import re,json,unicodedata,sys,os,pathlib
 E={ # símbolo: (nombre, masa, covalente, vdw, valencia, color)
@@ -50,52 +50,27 @@ def pf(f):
 def slug(n):
     n=unicodedata.normalize('NFD',n.lower());n=''.join(c for c in n if not unicodedata.combining(c))
     return re.sub(r'[^a-z0-9]+','-',n).strip('-')
-SUM={'Inorgánicos':'Compuesto inorgánico','Hidrocarburos':'Hidrocarburo','Aromáticos':'Compuesto aromático o heterocíclico','Esenciales':'Compuesto orgánico fundamental','Aminoácidos':'Aminoácido proteinogénico','Neurotransmisores':'Neurotransmisor u hormona','Fármacos':'Principio activo de uso farmacéutico','Naturales':'Producto natural','Vitaminas':'Vitamina','Azúcares y lípidos':'Azúcar o lípido','Nucleótidos':'Base o nucleósido','Polímeros':'Monómero o precursor de polímeros'}
-BASE=('Esenciales','Fármacos','Neurotransmisores','Aminoácidos','Aromáticos')
+
+CATS=['Esenciales','Fármacos','Neurotransmisores','Aminoácidos','Aromáticos','Inorgánicos','Hidrocarburos','Naturales','Vitaminas','Azúcares y lípidos','Nucleótidos','Polímeros']
 R=pathlib.Path(__file__).resolve().parent.parent
-def construir(validar_solo=False):
-    used={'cafeina','aspirina','paracetamol','ibuprofeno','serotonina','dopamina','glicina','alanina','benceno','tolueno','etanol','agua','metano','acido-acetico'}
-    out=[];bad=[];cats=[]
+def construir(solo_validar=False):
+    usados=set();out=[];bad=[]
     for n,ln in enumerate((R/'data/moleculas.txt').read_text(encoding='utf8').splitlines(),1):
         if not ln.strip() or ln.startswith('#'):continue
-        p=ln.split('|')
+        p=[x.strip() for x in ln.split('|')]
         if len(p)<4:bad.append(f'línea {n}: faltan campos');continue
-        cat,name,smi,f=[x.strip() for x in p[:4]];cid=p[4].strip() if len(p)>4 and p[4].strip() else None
-        if cat not in SUM:bad.append(f'línea {n} ({name}): categoría desconocida «{cat}»');continue
-        try:
-            a,b=parse(smi);c=formula(a,b)
-        except Exception as e:
-            bad.append(f'línea {n} ({name}): SMILES inválido ({e})');continue
+        cat,name,smi,f=p[:4];cid=int(p[4]) if len(p)>4 and p[4].isdigit() else 0
+        if cat not in CATS:bad.append(f'línea {n} ({name}): categoría desconocida «{cat}»');continue
+        try:a,b=parse(smi);c=formula(a,b)
+        except Exception as e:bad.append(f'línea {n} ({name}): SMILES inválido ({e})');continue
         if c!=pf(f):bad.append(f'línea {n} ({name}): la fórmula {f} no coincide con el SMILES (da {c})');continue
         s=slug(name)
-        if s in used:bad.append(f'línea {n} ({name}): nombre repetido');continue
-        used.add(s)
-        if cat not in cats:cats.append(cat)
-        els=','.join('`%s`'%x for x in a);bs=','.join('[%d,%d%s]'%(x[0],x[1],'' if x[2]==1 else ','+str(x[2])) for x in b)
-        out.append('{slug:`%s`,name:`%s`,iupac:`%s`,category:`%s`,%ssummary:`%s: %s.`,build:()=>O([%s],[%s])}'%(s,name,name.lower(),cat,'pubchemCid:%s,'%cid if cid and cid.isdigit() else '',SUM[cat],f,els,bs))
+        if s in usados:bad.append(f'línea {n} ({name}): nombre repetido');continue
+        usados.add(s);out.append({'s':s,'n':name,'c':cat,'f':f,'i':cid,'a':a,'b':b})
     for m in bad:print('ERROR',m)
     print(f'{len(out)} moléculas válidas, {len(bad)} con error')
     if bad:sys.exit(1)
-    if validar_solo:return
-    s=(R/'data/fixtures-original.js').read_text(encoding='utf8')
-    ver=(R/'VERSION').read_text().strip()
-    els=','.join("%s:{symbol:`%s`,name:`%s`,mass:%s,covalent:%s,vdw:%s,valence:%s,color:`%s`}"%x[:1]+x[:1]+x[1:] if False else "%s:{symbol:`%s`,name:`%s`,mass:%s,covalent:%s,vdw:%s,valence:%s,color:`%s`}"%(x[0],x[0],x[1],x[2],x[3],x[4],x[5],x[6]) for x in NEW)
-    def rep(s,a,b):
-        assert s.count(a)==1,a;return s.replace(a,b)
-    s=rep(s,"color:`#9b4fd1`}},te=[","color:`#9b4fd1`},"+els+"},te=[")
-    s=rep(s,"`I`,`H`]","`I`,`H`,"+','.join('`%s`'%x[0] for x in NEW)+"]")
-    s=rep(s,"}],Cn=[`Esenciales`","},"+",".join(out)+"],Cn=[`Esenciales`")
-    s=rep(s,"`Aromáticos`]","`Aromáticos`,"+','.join('`%s`'%c for c in cats if c not in BASE)+"]")
-    s=rep(s,"url:e=>`https://pubchem.ncbi.nlm.nih.gov/compound/${e.pubchemCid}`","url:e=>e.pubchemCid?`https://pubchem.ncbi.nlm.nih.gov/compound/${e.pubchemCid}`:`https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(e.name)}`")
-    s=rep(s,"v0.1","v"+ver)
-    s=re.sub(r"href:`/(?!/|Molforge-pro)([^`]*)`",r"href:`/Molforge-pro/\1`",s)   # enlaces fijos del menú
-    (R/'assets/fixtures-D22f8Dkt.js').write_text(s,encoding='utf8')
-    total=14+len(out)
-    for f in ('index.html','404.html'):
-        h=(R/f).read_text(encoding='utf8')
-        h=re.sub(r'(Elige entre (?:<!-- -->)?)\d+((?:<!-- -->)? compuestos)',r'\g<1>%d\2'%total,h)
-        h=re.sub(r'MIT · v[\w. ]+?(?=<)', 'MIT · v'+ver, h)
-        (R/f).write_text(h,encoding='utf8')
-    print('Biblioteca reconstruida:',total,'moléculas · versión',ver)
-if __name__=='__main__':
-    construir('--validate' in sys.argv)
+    if solo_validar:return
+    (R/'assets/biblioteca.json').write_text(json.dumps({'v':(R/'VERSION').read_text().strip(),'cats':CATS,'mols':out},ensure_ascii=False,separators=(',',':')),encoding='utf8')
+    print('assets/biblioteca.json escrito con',len(out),'moléculas')
+if __name__=='__main__':construir('--validate' in sys.argv)

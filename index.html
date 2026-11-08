@@ -1,32 +1,131 @@
-<!doctype html>
-<html lang="es" class="dark">
+<!DOCTYPE html>
+<html lang="es" data-theme="oscuro">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1018" />
-  <meta name="description" content="MolForge Pro: crea, explora y exporta moléculas desde tu móvil." />
-  <title>MolForge Pro · Laboratorio molecular</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<title>WEX MolForge Pro</title>
+<meta name="description" content="Laboratorio molecular 3D: crea, busca y descarga moléculas, incluso sin conexión.">
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>try{var t=localStorage.getItem("wex-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-  <div id="loader" class="loader"><div class="loader-mark"><span></span><span></span><span></span></div><strong>MolForge</strong><small>Preparando tu laboratorio…</small></div>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#inicio" data-route="inicio" aria-label="MolForge Pro, inicio"><span class="brand-symbol">✣</span><span>Mol<span>Forge</span></span><small>PRO</small></a>
-      <div class="top-actions"><button class="icon-btn" id="themeBtn" aria-label="Cambiar tema">◐</button><button class="avatar" aria-label="Perfil">MF</button></div>
-    </header>
-    <main id="main"></main>
-    <nav class="bottom-nav" aria-label="Navegación principal">
-      <a href="#inicio" data-route="inicio"><span>⌂</span><small>Inicio</small></a>
-      <a href="#forja" data-route="forja"><span>✣</span><small>Forja</small></a>
-      <a href="#biblioteca" data-route="biblioteca"><span>▦</span><small>Biblioteca</small></a>
-      <a href="#guardados" data-route="guardados"><span>♡</span><small>Guardados</small></a>
-    </nav>
-  </div>
-  <script src="data/molecules.json" type="application/json" id="molecule-data"></script>
-  <script src="app.js" defer></script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-explore" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3"/><path d="M7.5 15h9"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
+<symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></symbol>
+<symbol id="i-atom" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/></symbol>
+<symbol id="i-bond" viewBox="0 0 24 24"><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="5" r="2.5"/><path d="m7 17 10-10"/></symbol>
+<symbol id="i-erase" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol>
+<symbol id="i-wand" viewBox="0 0 24 24"><path d="m5 19 9-9M13 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM18 12l.7 1.3L20 14l-1.3.7L18 16l-.7-1.3L16 14l1.3-.7z"/></symbol>
+<symbol id="i-center" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+<symbol id="i-data" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3Z"/><path d="M9.5 14a2.6 2.6 0 0 0 2 2.4"/></symbol>
+</defs></svg>
+
+<div id="splash" role="status" aria-live="polite">
+  <div class="orbit" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+  <h1>WEX MolForge <small>Pro</small></h1>
+  <p id="splash-msg">Preparando el laboratorio…</p>
+  <div class="bar"><span id="splash-bar"></span></div>
+</div>
+
+<main id="app">
+  <section id="tab-explorar" class="tab on" aria-label="Biblioteca">
+    <header class="top"><div><h1>Biblioteca</h1><p id="count" class="muted"></p></div><span class="pill">v0.5 beta</span></header>
+    <div class="search"><svg class="ic"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Buscar compuesto o fórmula…" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Buscar compuesto"><button id="qclear" class="icon-btn" aria-label="Borrar búsqueda" hidden><svg class="ic"><use href="#i-x"/></svg></button></div>
+    <div id="chips" class="chips" role="tablist" aria-label="Categorías"></div>
+    <button id="newcard" class="hero"><span class="hero-ic"><svg class="ic"><use href="#i-atom"/></svg></span><span><b>Crear desde cero</b><small>Coloca átomos, une enlaces simples, dobles o triples y arrástralos para darle forma.</small></span><svg class="ic chev"><use href="#i-chev"/></svg></button>
+    <div id="list" class="list"></div>
+    <div id="sentinel" aria-hidden="true"></div>
+  </section>
+
+  <section id="tab-lab" class="tab" aria-label="Laboratorio">
+    <div class="labtop">
+      <div class="nameRow"><h2 id="mname">Lienzo vacío</h2><span id="mspin" class="spin" hidden></span></div>
+      <div id="mchips" class="mchips"></div>
+      <p id="mmeta" class="muted"></p>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="cv" tabindex="0" role="img" aria-label="Visor molecular 3D. Arrastra para girar."></canvas>
+      <div class="fabs">
+        <button class="fab" data-sheet="data" aria-label="Datos de la molécula"><svg class="ic"><use href="#i-data"/></svg></button>
+        <button class="fab" data-sheet="down" aria-label="Descargar"><svg class="ic"><use href="#i-down"/></svg></button>
+        <button class="fab" data-sheet="opts" aria-label="Opciones"><svg class="ic"><use href="#i-sliders"/></svg></button>
+        <button class="fab" id="btn-center" aria-label="Centrar vista"><svg class="ic"><use href="#i-center"/></svg></button>
+      </div>
+      <div id="hint" class="hint" hidden></div>
+    </div>
+    <div class="dock">
+      <div class="tools" role="radiogroup" aria-label="Herramienta">
+        <button data-tool="move" aria-checked="true" role="radio"><svg class="ic"><use href="#i-move"/></svg><span>Mover</span></button>
+        <button data-tool="atom" role="radio"><svg class="ic"><use href="#i-atom"/></svg><span>Átomo</span></button>
+        <button data-tool="bond" role="radio"><svg class="ic"><use href="#i-bond"/></svg><span>Enlace</span></button>
+        <button data-tool="erase" role="radio"><svg class="ic"><use href="#i-erase"/></svg><span>Borrar</span></button>
+      </div>
+      <div class="row2">
+        <div class="orders" role="radiogroup" aria-label="Tipo de enlace">
+          <button data-order="1" aria-checked="true" role="radio" aria-label="Enlace simple"><svg class="ic" viewBox="0 0 28 20"><path d="M4 10h20"/></svg></button>
+          <button data-order="2" role="radio" aria-label="Enlace doble"><svg class="ic" viewBox="0 0 28 20"><path d="M4 7h20M4 13h20"/></svg></button>
+          <button data-order="3" role="radio" aria-label="Enlace triple"><svg class="ic" viewBox="0 0 28 20"><path d="M4 4h20M4 10h20M4 16h20"/></svg></button>
+        </div>
+        <div class="acts">
+          <button id="btn-undo" class="icon-btn" aria-label="Deshacer" disabled><svg class="ic"><use href="#i-undo"/></svg></button>
+          <button id="btn-redo" class="icon-btn" aria-label="Rehacer" disabled><svg class="ic"><use href="#i-redo"/></svg></button>
+          <button id="btn-auto" class="icon-btn" aria-label="Acomodar forma"><svg class="ic"><use href="#i-wand"/></svg></button>
+        </div>
+      </div>
+      <div id="palette" class="palette" aria-label="Elementos"></div>
+    </div>
+  </section>
+
+  <section id="tab-ajustes" class="tab" aria-label="Ajustes">
+    <header class="top"><div><h1>Ajustes</h1><p class="muted">Todo se guarda en tu dispositivo.</p></div></header>
+    <h3>Tema</h3>
+    <div class="themes" role="radiogroup" aria-label="Tema visual">
+      <button data-th="claro" role="radio"><span class="sw sw-claro"><svg class="ic"><use href="#i-sun"/></svg></span>Claro</button>
+      <button data-th="oscuro" role="radio"><span class="sw sw-oscuro"><svg class="ic"><use href="#i-moon"/></svg></span>Oscuro</button>
+      <button data-th="cristal" role="radio"><span class="sw sw-cristal"><svg class="ic"><use href="#i-drop"/></svg></span>Cristal líquido</button>
+    </div>
+    <h3>Preferencias</h3>
+    <div class="card list-s">
+      <label class="sw-row"><span>Buscar nombre en PubChem<small>Si hay internet, identifica estructuras nuevas.</small></span><input type="checkbox" id="st-online" checked></label>
+      <label class="sw-row"><span>Vibración suave<small>Al colocar átomos y enlaces.</small></span><input type="checkbox" id="st-haptic" checked></label>
+    </div>
+    <h3>Sin conexión</h3>
+    <div class="card"><p id="offline-state" class="muted">Comprobando…</p><button id="btn-install" class="btn" hidden>Instalar como app</button></div>
+    <h3>Acerca de</h3>
+    <div class="card muted small"><p><b>WEX MolForge Pro v0.5 beta</b> · licencia MIT. Datos de PubChem (NIH, dominio público) y RCSB PDB.</p><p>Código abierto: cualquiera puede colaborar desde GitHub (ver <i>CONTRIBUTING.md</i>).</p></div>
+  </section>
+</main>
+
+<nav id="tabbar" aria-label="Secciones">
+  <button data-go="explorar" class="on"><svg class="ic"><use href="#i-explore"/></svg><span>Biblioteca</span></button>
+  <button data-go="lab"><svg class="ic"><use href="#i-flask"/></svg><span>Laboratorio</span></button>
+  <button data-go="ajustes"><svg class="ic"><use href="#i-gear"/></svg><span>Ajustes</span></button>
+</nav>
+
+<div id="scrim" hidden></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-hidden="true"><div class="grab"></div><div id="sheet-body"></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/chem.js"></script>
+<script src="assets/view.js"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>

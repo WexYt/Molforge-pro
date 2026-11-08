@@ -1,21 +1,23 @@
 # Cómo colaborar en WEX MolForge Pro
 
-Todo aporte es bienvenido. Hay dos caminos, sin instalar nada.
+## Añadir moléculas (lo más fácil, sin instalar nada)
+1. Abre `data/moleculas.txt` en GitHub y pulsa ✏️ (GitHub crea tu copia).
+2. Agrega una línea por molécula: `Categoría|Nombre|SMILES|Fórmula|CID(opcional)`. El formato está al inicio del archivo.
+   - SMILES en forma Kekulé: dobles enlaces explícitos en los anillos (`C1=CC=CC=C1`). Sin cargas ni estereoquímica.
+3. **Commit changes → Propose changes → Create pull request.**
+4. Un chequeo automático valida que la fórmula coincida con el SMILES y te dice la línea exacta si falla.
+5. Al aprobarse, `assets/biblioteca.json` se regenera solo.
 
-## Añadir moléculas (el aporte más fácil)
-1. Abre `data/moleculas.txt` en GitHub y pulsa el lápiz ✏️ (GitHub crea tu copia automáticamente).
-2. Agrega una línea por molécula: `Categoría|Nombre|SMILES|Fórmula|CID(opcional)`. El formato y las categorías están al inicio del archivo.
-3. Pulsa **Commit changes → Propose changes → Create pull request**.
-4. Un chequeo automático valida que la fórmula coincida con el SMILES. Si falla, te dice la línea exacta.
-5. Cuando el dueño del repositorio lo aprueba, la biblioteca se reconstruye sola.
+## Cambiar la app
+El código está en `assets/` (sin compilar):
+- `chem.js`: modelo, fórmulas, reconocimiento, geometría, formatos de archivo.
+- `view.js`: dibujo en canvas y gestos táctiles.
+- `app.js` + `app.css` + `index.html`: interfaz y temas.
 
-## Reportar errores o pedir moléculas
-Abre un *Issue* y elige una plantilla.
-
-## Cambios de diseño
-Los temas viven en `assets/wex-v04.css` (variables de color por tema) y `assets/wex-v04.js` (selector de tema). Haz un *fork*, edita, y abre un *Pull Request* con una captura de pantalla.
+Haz un *fork*, prueba en un celular (o con `python3 servidor.py`), y abre un Pull Request con una captura de pantalla.
+Si cambias archivos de `assets/`, sube el número de versión de caché en `sw.js` (`wex-molforge-vN`).
 
 ## Reglas
-- Licencia MIT: al aportar aceptas publicar tu aporte bajo esa licencia.
+- Licencia MIT: al aportar aceptas publicar tu aporte bajo ella.
 - No subas material con derechos de autor ni código de terceros sin licencia.
 - Respeto y paciencia: es un proyecto personal abierto.

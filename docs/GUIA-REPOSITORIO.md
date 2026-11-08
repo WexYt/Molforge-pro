@@ -6,8 +6,8 @@
 | Repositorio | `https://github.com/WexYt/Molforge-pro` |
 | Sitio publicado | `https://wexyt.github.io/Molforge-pro/` |
 | Moléculas (aquí se agregan) | `data/moleculas.txt` |
-| Temas y animaciones | `assets/wex-v04.css` y `assets/wex-v04.js` |
-| Biblioteca generada (no editar a mano) | `assets/fixtures-D22f8Dkt.js` |
+| Interfaz y temas | `assets/app.css`, `assets/app.js`, `index.html` |
+| Biblioteca generada (no editar a mano) | `assets/biblioteca.json` |
 | Versión | `VERSION` y `CHANGELOG.md` |
 | Para colaboradores | `CONTRIBUTING.md` |
 
@@ -30,7 +30,7 @@ git push
 ```
 
 ## 3. Versiones
-1. Cambia el texto de `VERSION` (p. ej. `0.5 beta`) y anota cambios en `CHANGELOG.md`.
+1. Cambia el texto de `VERSION` (p. ej. `0.6 beta`) y la insignia en `index.html` y anota cambios en `CHANGELOG.md`.
 2. Sube los cambios. El flujo automático actualiza la insignia de versión de la página.
 3. En GitHub: *Releases → Create a new release*, etiqueta `v0.5-beta`. Así queda una copia descargable de cada versión.
 Para forzar que quienes usan la app instalada reciban todo de inmediato, sube el número `wex-molforge-v2` de `sw.js` (p. ej. `v3`).
@@ -41,17 +41,18 @@ Recomendado en **Settings → Branches → Add rule** para `main`: exigir Pull R
 
 ## 5. Qué hace el flujo automático (`.github/workflows/biblioteca.yml`)
 - En un Pull Request: revisa que cada molécula tenga fórmula y SMILES coherentes. Si no, marca la línea con error.
-- Al unir a `main`: reconstruye `fixtures-*.js` y lo guarda solo.
+- Al unir a `main`: regenera `assets/biblioteca.json` y lo guarda solo.
 
-## 6. Límites actuales (importante)
-Solo tenemos el código **compilado** de la app. Se pueden agregar moléculas, temas y estilos, pero no cambiar la lógica de la Forja o la Biblioteca. Para eso se necesita el código fuente original (carpeta `src` y `package.json`); si lo consigues, se reorganiza el repositorio y se despliega con GitHub Actions.
+## 6. Límites actuales
+La app ya es código abierto y editable. Pendientes conocidos: integrar ChEMBL, estereoquímica, importar archivos del dispositivo y verificar los CID de PubChem de las moléculas nuevas (están escritos de memoria). Las rutas con carpeta del repositorio ya no importan: la app usa rutas relativas y funciona en cualquier dirección.
 
 ## 7. Estructura
 ```
-index.html  404.html  sw.js  manifest.webmanifest  icon-*.png  favicon.svg
-assets/    app compilada + wex-v04.css/js + fixtures (biblioteca)
-data/      moleculas.txt + fixtures-original.js (base sin modificar)
+index.html  sw.js  manifest.webmanifest  icon-*.png  favicon.svg
+assets/    app.css · chem.js · view.js · app.js · biblioteca.json (generado)
+data/      moleculas.txt
 tools/     build_biblioteca.py
-docs/      esta guía y las decisiones de arquitectura (ADR)
+docs/      guías y decisiones de arquitectura (ADR)
 .github/   flujo automático y plantillas
 ```
+Cada vez que cambies archivos de `assets/`, sube el número de `wex-molforge-vN` en `sw.js` para que quienes tienen la app instalada reciban la versión nueva.

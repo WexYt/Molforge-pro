@@ -5,6 +5,20 @@
 # - La fórmula se usa para validar la estructura (el CI rechaza líneas donde no coincide).
 # - Categorías existentes: Esenciales, Fármacos, Neurotransmisores, Aminoácidos, Aromáticos, Inorgánicos,
 #   Hidrocarburos, Naturales, Vitaminas, Azúcares y lípidos, Nucleótidos, Polímeros.
+Esenciales|Agua|O|H2O|962
+Esenciales|Metano|C|CH4|297
+Esenciales|Etanol|CCO|C2H6O|702
+Esenciales|Ácido acético|CC(O)=O|C2H4O2|176
+Aromáticos|Benceno|C1=CC=CC=C1|C6H6|241
+Aromáticos|Tolueno|CC1=CC=CC=C1|C7H8|1140
+Aminoácidos|Glicina|NCC(O)=O|C2H5NO2|750
+Aminoácidos|Alanina|CC(N)C(O)=O|C3H7NO2|5950
+Neurotransmisores|Dopamina|NCCC1=CC(O)=C(O)C=C1|C8H11NO2|681
+Neurotransmisores|Serotonina|NCCC1=CNC2=CC=C(O)C=C12|C10H12N2O|5202
+Fármacos|Paracetamol|CC(=O)NC1=CC=C(O)C=C1|C8H9NO2|1983
+Fármacos|Ibuprofeno|CC(C)CC1=CC=C(C=C1)C(C)C(O)=O|C13H18O2|3672
+Fármacos|Aspirina|CC(=O)OC1=CC=CC=C1C(O)=O|C9H8O4|2244
+Fármacos|Cafeína|CN1C=NC2=C1C(=O)N(C)C(=O)N2C|C8H10N4O2|2519
 Inorgánicos|Hidrógeno|[H][H]|H2|783
 Inorgánicos|Oxígeno|O=O|O2|977
 Inorgánicos|Nitrógeno|N#N|N2|947
