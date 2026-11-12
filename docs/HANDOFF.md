@@ -12,7 +12,14 @@ Para cualquier persona o modelo de IA que continúe el trabajo **sin alterar las
 7. Tres temas: **Claro, Oscuro y Cristal líquido (Liquid Glass)**. **100 % sin conexión** (app instalable).
 8. Otras personas pueden **colaborar subiendo aportes** al repositorio; el propietario aprueba.
 
-## Estado actual (v0.5 beta)
+## Órdenes añadidas en la v0.6 (no cambiar)
+9. Historial de moléculas con fecha y hora; **avisar cuando una molécula fue buscada en PubChem** (no creada).
+10. **Biblioteca del dispositivo** (moléculas guardadas) y un apartado para **desbloquear compuestos**.
+11. **Tabla periódica completa** en el laboratorio, en secciones por familia, y **más reglas** como Lipinski.
+12. **Modo escritorio/tableta** con las mismas funciones y más amplio, cuidando la estética.
+13. Usar los activos de **liquid glass** que aportó el propietario (`assets/liquid-glass.js`, `docs/liquid-glass-SKILL.md`): solo en el tema Cristal, sin elementos de más de ~800 px por lado, y sin hacer que la refracción comunique información.
+
+## Estado actual (v0.6 beta)
 - App en JS puro: `assets/chem.js` (modelo, fórmula, huella canónica, geometría, hidrógenos derivados, SDF/MOL/XYZ/SMILES), `assets/view.js` (canvas, gestos), `assets/app.js` + `app.css` + `index.html`.
 - Biblioteca: `data/moleculas.txt` → `tools/build_biblioteca.py` → `assets/biblioteca.json` (CI valida y regenera).
 - Probado con Chromium sin interfaz (Playwright): búsqueda, apertura, creación, arrastre, enlaces, deshacer, descarga SDF, temas, uso sin conexión, geometría de las 226 moléculas.
@@ -23,6 +30,9 @@ Para cualquier persona o modelo de IA que continúe el trabajo **sin alterar las
 - Pocas animaciones, con propósito (entrada de lista, aparición de átomos, cambio de tema circular); respetan «reducir movimiento».
 
 ## Pendientes conocidos
+logP y reglas basadas en logP · probar en iPhone/Safari reales · verificar CID de PubChem escritos de memoria · ChEMBL · estereoquímica · probar el vidrio líquido en Safari/Firefox (usa respaldo esmerilado).
+
+## Pendientes anteriores
 ChEMBL · estereoquímica · importar MOL/SDF del dispositivo · verificar CID de PubChem escritos de memoria · pruebas en iPhone/Safari reales · compartir la vista como imagen con marca.
 
 ## Reglas para continuar

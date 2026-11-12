@@ -51,7 +51,7 @@ def slug(n):
     n=unicodedata.normalize('NFD',n.lower());n=''.join(c for c in n if not unicodedata.combining(c))
     return re.sub(r'[^a-z0-9]+','-',n).strip('-')
 
-CATS=['Esenciales','Fármacos','Neurotransmisores','Aminoácidos','Aromáticos','Inorgánicos','Hidrocarburos','Naturales','Vitaminas','Azúcares y lípidos','Nucleótidos','Polímeros']
+CATS=['Esenciales','Fármacos','Neurotransmisores','Aminoácidos','Aromáticos','Inorgánicos','Hidrocarburos','Naturales','Vitaminas','Azúcares y lípidos','Nucleótidos','Polímeros','Desbloqueables']
 R=pathlib.Path(__file__).resolve().parent.parent
 def construir(solo_validar=False):
     usados=set();out=[];bad=[]
@@ -59,14 +59,16 @@ def construir(solo_validar=False):
         if not ln.strip() or ln.startswith('#'):continue
         p=[x.strip() for x in ln.split('|')]
         if len(p)<4:bad.append(f'línea {n}: faltan campos');continue
-        cat,name,smi,f=p[:4];cid=int(p[4]) if len(p)>4 and p[4].isdigit() else 0
+        cat,name,smi,f=p[:4];cid=int(p[4]) if len(p)>4 and p[4].isdigit() else 0;reto=p[5] if len(p)>5 and p[5] else ''
         if cat not in CATS:bad.append(f'línea {n} ({name}): categoría desconocida «{cat}»');continue
         try:a,b=parse(smi);c=formula(a,b)
         except Exception as e:bad.append(f'línea {n} ({name}): SMILES inválido ({e})');continue
         if c!=pf(f):bad.append(f'línea {n} ({name}): la fórmula {f} no coincide con el SMILES (da {c})');continue
         s=slug(name)
         if s in usados:bad.append(f'línea {n} ({name}): nombre repetido');continue
-        usados.add(s);out.append({'s':s,'n':name,'c':cat,'f':f,'i':cid,'a':a,'b':b})
+        usados.add(s);d={'s':s,'n':name,'c':cat,'f':f,'i':cid,'a':a,'b':b}
+        if reto:d['u']=reto
+        out.append(d)
     for m in bad:print('ERROR',m)
     print(f'{len(out)} moléculas válidas, {len(bad)} con error')
     if bad:sys.exit(1)

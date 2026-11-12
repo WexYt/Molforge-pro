@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""Genera assets/elementos.js (118 elementos) · python3 tools/build_elementos.py
+Radios covalentes: Cordero 2008 (Z>96 aproximados). Valencias, radios vdW y colores de elementos pesados
+son aproximaciones pensadas para visualización, no datos de referencia."""
+import json, pathlib
+R = pathlib.Path(__file__).resolve().parent.parent
+TABLE = """1 H Hidrógeno 1.008|2 He Helio 4.0026|3 Li Litio 6.94|4 Be Berilio 9.0122|5 B Boro 10.81|6 C Carbono 12.011|7 N Nitrógeno 14.007|8 O Oxígeno 15.999|9 F Flúor 18.998|10 Ne Neón 20.18|11 Na Sodio 22.99|12 Mg Magnesio 24.305|13 Al Aluminio 26.982|14 Si Silicio 28.085|15 P Fósforo 30.974|16 S Azufre 32.06|17 Cl Cloro 35.45|18 Ar Argón 39.948|19 K Potasio 39.098|20 Ca Calcio 40.078|21 Sc Escandio 44.956|22 Ti Titanio 47.867|23 V Vanadio 50.942|24 Cr Cromo 51.996|25 Mn Manganeso 54.938|26 Fe Hierro 55.845|27 Co Cobalto 58.933|28 Ni Níquel 58.693|29 Cu Cobre 63.546|30 Zn Zinc 65.38|31 Ga Galio 69.723|32 Ge Germanio 72.63|33 As Arsénico 74.922|34 Se Selenio 78.971|35 Br Bromo 79.904|36 Kr Kriptón 83.798|37 Rb Rubidio 85.468|38 Sr Estroncio 87.62|39 Y Itrio 88.906|40 Zr Circonio 91.224|41 Nb Niobio 92.906|42 Mo Molibdeno 95.95|43 Tc Tecnecio 98|44 Ru Rutenio 101.07|45 Rh Rodio 102.906|46 Pd Paladio 106.42|47 Ag Plata 107.868|48 Cd Cadmio 112.414|49 In Indio 114.818|50 Sn Estaño 118.71|51 Sb Antimonio 121.76|52 Te Telurio 127.6|53 I Yodo 126.904|54 Xe Xenón 131.293|55 Cs Cesio 132.905|56 Ba Bario 137.327|57 La Lantano 138.905|58 Ce Cerio 140.116|59 Pr Praseodimio 140.908|60 Nd Neodimio 144.242|61 Pm Prometio 145|62 Sm Samario 150.36|63 Eu Europio 151.964|64 Gd Gadolinio 157.25|65 Tb Terbio 158.925|66 Dy Disprosio 162.5|67 Ho Holmio 164.93|68 Er Erbio 167.259|69 Tm Tulio 168.934|70 Yb Iterbio 173.045|71 Lu Lutecio 174.967|72 Hf Hafnio 178.49|73 Ta Tántalo 180.948|74 W Wolframio 183.84|75 Re Renio 186.207|76 Os Osmio 190.23|77 Ir Iridio 192.217|78 Pt Platino 195.084|79 Au Oro 196.967|80 Hg Mercurio 200.592|81 Tl Talio 204.38|82 Pb Plomo 207.2|83 Bi Bismuto 208.98|84 Po Polonio 209|85 At Astato 210|86 Rn Radón 222|87 Fr Francio 223|88 Ra Radio 226|89 Ac Actinio 227|90 Th Torio 232.038|91 Pa Protactinio 231.036|92 U Uranio 238.029|93 Np Neptunio 237|94 Pu Plutonio 244|95 Am Americio 243|96 Cm Curio 247|97 Bk Berkelio 247|98 Cf Californio 251|99 Es Einstenio 252|100 Fm Fermio 257|101 Md Mendelevio 258|102 No Nobelio 259|103 Lr Lawrencio 266|104 Rf Rutherfordio 267|105 Db Dubnio 268|106 Sg Seaborgio 269|107 Bh Bohrio 270|108 Hs Hasio 277|109 Mt Meitnerio 278|110 Ds Darmstatio 281|111 Rg Roentgenio 282|112 Cn Copernicio 285|113 Nh Nihonio 286|114 Fl Flerovio 289|115 Mc Moscovio 290|116 Lv Livermorio 293|117 Ts Tenesino 294|118 Og Oganesón 294"""
+RC = [.31,.28,1.28,.96,.84,.76,.71,.66,.57,.58,1.66,1.41,1.21,1.11,1.07,1.05,1.02,1.06,2.03,1.76,1.7,1.6,1.53,1.39,1.39,1.32,1.26,1.24,1.32,1.22,1.22,1.2,1.19,1.2,1.2,1.16,2.2,1.95,1.9,1.75,1.64,1.54,1.47,1.46,1.42,1.39,1.45,1.44,1.42,1.39,1.39,1.38,1.39,1.4,2.44,2.15,2.07,2.04,2.03,2.01,1.99,1.98,1.98,1.96,1.94,1.92,1.92,1.89,1.9,1.87,1.87,1.75,1.7,1.62,1.51,1.44,1.41,1.36,1.36,1.32,1.45,1.46,1.48,1.4,1.5,1.5,2.6,2.21,2.15,2.06,2.0,1.96,1.9,1.87,1.8,1.69]
+# Base: valores ya usados por la biblioteca (no cambiar): (vdW, valencia, color)
+BASE = {'H':(1.2,1,'#f2f4f8'),'C':(1.7,4,'#5b6270'),'N':(1.55,3,'#4f7cff'),'O':(1.52,2,'#ff4d4d'),'F':(1.47,1,'#8ee05a'),'P':(1.8,3,'#ff9a3c'),'S':(1.8,2,'#ffe14d'),'Cl':(1.75,1,'#3fe05a'),'Br':(1.85,1,'#b5453a'),'I':(1.98,1,'#a23ad1'),'B':(1.92,3,'#f2a6a6'),'Si':(2.1,4,'#c9a27e'),'Se':(1.9,2,'#ffa100'),'As':(1.85,3,'#bd80e3'),'Li':(1.82,1,'#cc80ff'),'Na':(2.27,1,'#ab5cf2'),'K':(2.75,1,'#8f40d4'),'Mg':(1.73,2,'#8aff00'),'Ca':(2.31,2,'#3dff00'),'Al':(1.84,3,'#bfa6a6'),'Zn':(1.39,2,'#7d80b0'),'Fe':(2.04,2,'#e06633'),'Cu':(1.4,2,'#c88033'),'He':(1.4,0,'#d9ffff'),'Ne':(1.54,0,'#b3e3f5'),'Ar':(1.88,0,'#80d1e3'),'Kr':(2.02,0,'#5cb8d1'),'Xe':(2.16,0,'#429eb0')}
+BASEMAX = {'H':1,'C':4,'N':5,'O':3,'F':1,'P':5,'S':6,'Cl':1,'Br':1,'I':1,'B':3,'Si':4,'Se':6,'As':5,'Li':1,'Na':1,'K':1,'Mg':2,'Ca':2,'Al':3,'Zn':2,'Fe':3,'Cu':2,'He':0,'Ne':0,'Ar':0,'Kr':0,'Xe':0}
+NOMETAL = 'H C N O P S Se'.split(); HAL = 'F Cl Br I At Ts'.split(); NOBLE = 'He Ne Ar Kr Xe Rn Og'.split()
+ALC = 'Li Na K Rb Cs Fr'.split(); ALT = 'Be Mg Ca Sr Ba Ra'.split(); METAL = 'B Si Ge As Sb Te'.split()
+POST = 'Al Ga In Sn Tl Pb Bi Po Nh Fl Mc Lv'.split()
+def fam(z, s):
+    if s in NOMETAL: return 'nometal'
+    if s in HAL: return 'halogeno'
+    if s in NOBLE: return 'noble'
+    if s in ALC: return 'alcalino'
+    if s in ALT: return 'alcalinoterreo'
+    if s in METAL: return 'metaloide'
+    if s in POST: return 'postransicion'
+    if 57 <= z <= 71: return 'lantanido'
+    if 89 <= z <= 103: return 'actinido'
+    return 'transicion'
+VAL = {'Be':2,'Rb':1,'Cs':1,'Fr':1,'Sr':2,'Ba':2,'Ra':2,'Ge':4,'Sb':3,'Te':2,'At':1,'Rn':0,'Ts':1,'Og':0,'Ga':3,'In':3,'Tl':3,'Sn':4,'Pb':4,'Bi':3,'Po':2,'Nh':3,'Fl':4,'Mc':3,'Lv':2}
+MAXV = {'Be':2,'Rb':1,'Cs':1,'Fr':1,'Sr':2,'Ba':2,'Ra':2,'Ge':4,'Sb':5,'Te':6,'At':1,'Rn':6,'Ts':1,'Og':0,'Ga':3,'In':3,'Tl':3,'Sn':6,'Pb':6,'Bi':5,'Po':6,'Nh':3,'Fl':4,'Mc':5,'Lv':6,'Xe':6,'Kr':2}
+JM = dict(Be='#c2ff00',Sc='#e6e6e6',Ti='#bfc2c7',V='#a6a6ab',Cr='#8a99c7',Mn='#9c7ac7',Co='#f090a0',Ni='#50d050',Ga='#c28f8f',Ge='#668f8f',Rb='#702eb0',Sr='#00ff00',Y='#94ffff',Zr='#94e0e0',Nb='#73c2c9',Mo='#54b5b5',Tc='#3b9e9e',Ru='#248f8f',Rh='#0a7d8c',Pd='#006985',Ag='#c0c0c0',Cd='#ffd98f',In='#a67573',Sn='#668080',Sb='#9e63b5',Te='#d47a00',Cs='#57178f',Ba='#00c900',La='#70d4ff',Ce='#ffffc7',Pr='#d9ffc7',Nd='#c7ffc7',Pm='#a3ffc7',Sm='#8fffc7',Eu='#61ffc7',Gd='#45ffc7',Tb='#30ffc7',Dy='#1fffc7',Ho='#00ff9c',Er='#00e675',Tm='#00d452',Yb='#00bf38',Lu='#00ab24',Hf='#4dc2ff',Ta='#4da6ff',W='#2194d6',Re='#267dab',Os='#266696',Ir='#175487',Pt='#d0d0e0',Au='#ffd123',Hg='#b8b8d0',Tl='#a6544d',Pb='#575961',Bi='#9e4fb5',Po='#ab5c00',At='#754f45',Rn='#428296',Fr='#420066',Ra='#007d00',Ac='#70abfa',Th='#00baff',Pa='#00a1ff',U='#008fff',Np='#0080ff',Pu='#006bff',Am='#545cf2',Cm='#785ce3',Bk='#8a4fe3',Cf='#a136d4',Es='#b31fd4',Fm='#b31fba',Md='#b30da6',No='#bd0d87',Lr='#c70066',Rf='#cc0059',Db='#d1004f',Sg='#d90045',Bh='#e00038',Hs='#e6002e',Mt='#eb0026')
+HUE = {'transicion':'#7f93b8','postransicion':'#8fa89a','actinido':'#d080a0','lantanido':'#e0a060','alcalino':'#ab5cf2','alcalinoterreo':'#7ddc3f','metaloide':'#6fbfa8','halogeno':'#6fdc6f','noble':'#80d1e3','nometal':'#9aa3b5'}
+E = {}; order = []
+for item in TABLE.split('|'):
+    z, s, name, m = item.split(' '); z = int(z); m = float(m); rc = RC[z-1] if z <= 96 else 1.7; f = fam(z, s)
+    vdw, val, col = BASE[s] if s in BASE else (round(min(2.6, rc*.75+1.15), 2), VAL.get(s, 0), JM.get(s, HUE[f]))
+    mx = BASEMAX[s] if s in BASEMAX else MAXV.get(s, 8 if val == 0 else max(val, 6))
+    E[s] = [name, m, rc, vdw, val, col, z, f, mx]; order.append(s)
+def of(k): return [s for s in order if E[s][7] == k]
+FAMS = [('frec','Frecuentes',['C','N','O','H','S','P','F','Cl','Br','I']),('nometal','No metales',of('nometal')),('halogeno','Halógenos',of('halogeno')),('noble','Gases nobles',of('noble')),('alcalino','Alcalinos',of('alcalino')),('alcalinoterreo','Alcalinotérreos',of('alcalinoterreo')),('metaloide','Metaloides',of('metaloide')),('transicion','Transición',of('transicion')),('postransicion','Post-transición',of('postransicion')),('lantanido','Lantánidos',of('lantanido')),('actinido','Actínidos',of('actinido'))]
+js = ("/* WEX MolForge Pro · elementos.js (generado por tools/build_elementos.py)\n   [nombre, masa, r.covalente, r.vdW, valencia, color, Z, familia, valencia máx.] */\n(function(g){var E=" + json.dumps(E, ensure_ascii=False, separators=(',', ':')) + ",F=" + json.dumps(FAMS, ensure_ascii=False, separators=(',', ':')) + ",Z=" + json.dumps(order) + ",A={E:E,F:F,Z:Z};if(typeof module!=='undefined')module.exports=A;else g.WEX_ELEMENTS=A})(typeof window!=='undefined'?window:globalThis);\n")
+(R / 'assets/elementos.js').write_text(js, encoding='utf8')
+print(len(E), 'elementos', len(js), 'bytes', {f[0]: len(f[2]) for f in FAMS})

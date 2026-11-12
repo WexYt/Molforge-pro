@@ -1,20 +1,8 @@
 /* WEX MolForge Pro · chem.js — motor químico sin dependencias (MIT)
    Modelo: {atoms:[{el,x,y,z}], bonds:[[a,b,orden]]}. Los hidrógenos se completan solos por valencia. */
 (function (g) {
-  // símbolo: [nombre, masa, radio covalente, radio vdW, valencia, color]
-  const EL = {
-    H: ['Hidrógeno', 1.008, .31, 1.2, 1, '#f2f4f8'], C: ['Carbono', 12.011, .76, 1.7, 4, '#5b6270'], N: ['Nitrógeno', 14.007, .71, 1.55, 3, '#4f7cff'],
-    O: ['Oxígeno', 15.999, .66, 1.52, 2, '#ff4d4d'], F: ['Flúor', 18.998, .57, 1.47, 1, '#8ee05a'], P: ['Fósforo', 30.974, 1.07, 1.8, 3, '#ff9a3c'],
-    S: ['Azufre', 32.06, 1.05, 1.8, 2, '#ffe14d'], Cl: ['Cloro', 35.45, 1.02, 1.75, 1, '#3fe05a'], Br: ['Bromo', 79.904, 1.2, 1.85, 1, '#b5453a'],
-    I: ['Yodo', 126.904, 1.39, 1.98, 1, '#a23ad1'], B: ['Boro', 10.81, .84, 1.92, 3, '#f2a6a6'], Si: ['Silicio', 28.085, 1.11, 2.1, 4, '#c9a27e'],
-    Se: ['Selenio', 78.971, 1.2, 1.9, 2, '#ffa100'], As: ['Arsénico', 74.922, 1.19, 1.85, 3, '#bd80e3'], Li: ['Litio', 6.94, 1.28, 1.82, 1, '#cc80ff'],
-    Na: ['Sodio', 22.99, 1.66, 2.27, 1, '#ab5cf2'], K: ['Potasio', 39.098, 2.03, 2.75, 1, '#8f40d4'], Mg: ['Magnesio', 24.305, 1.41, 1.73, 2, '#8aff00'],
-    Ca: ['Calcio', 40.078, 1.76, 2.31, 2, '#3dff00'], Al: ['Aluminio', 26.982, 1.21, 1.84, 3, '#bfa6a6'], Zn: ['Zinc', 65.38, 1.22, 1.39, 2, '#7d80b0'],
-    Fe: ['Hierro', 55.845, 1.32, 2.04, 2, '#e06633'], Cu: ['Cobre', 63.546, 1.32, 1.4, 2, '#c88033'], He: ['Helio', 4.0026, .28, 1.4, 0, '#d9ffff'],
-    Ne: ['Neón', 20.18, .58, 1.54, 0, '#b3e3f5'], Ar: ['Argón', 39.948, 1.06, 1.88, 0, '#80d1e3'], Kr: ['Kriptón', 83.798, 1.16, 2.02, 0, '#5cb8d1'],
-    Xe: ['Xenón', 131.293, 1.4, 2.16, 0, '#429eb0']
-  };
-  const PALETTE = ['C', 'N', 'O', 'S', 'P', 'F', 'Cl', 'Br', 'I', 'H', 'B', 'Si', 'Se', 'As', 'Li', 'Na', 'K', 'Mg', 'Ca', 'Al', 'Zn', 'Fe', 'Cu', 'He', 'Ne', 'Ar', 'Kr', 'Xe'];
+  // Tabla periódica completa: viene de elementos.js (generado). [nombre, masa, r.cov, r.vdW, valencia, color, Z, familia, valencia máx.]
+  const _W = typeof module !== 'undefined' ? require('./elementos.js') : g.WEX_ELEMENTS, EL = _W.E, FAMILIES = _W.F, ZORDER = _W.Z, maxv = e => EL[e][8];
   const rad = d => d * Math.PI / 180;
   const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], mul = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], len = a => Math.hypot(a[0], a[1], a[2]);
@@ -206,6 +194,29 @@
     const out = []; for (let i = 0; i < n; i++) if (!vis[i]) { dfs(i, -1); out.push(gen(i, -1)); }
     return out.join('.');
   }
+  // Superficie polar topológica aproximada (contribuciones tipo Ertl solo de N y O)
+  function tpsa(m, nb) {
+    let t = 0;
+    m.atoms.forEach((a, i) => {
+      const h = hcount(m, i, nb), dbl = nb[i].some(x => x[1] === 2), tri = nb[i].some(x => x[1] === 3), conj = nb[i].some(x => unsat(nb, x[0]));
+      if (a.el === 'N') t += tri ? 23.79 : dbl ? (h ? 23.85 : 12.36) : h >= 2 ? 26.02 : h === 1 ? (conj ? 15.79 : 12.03) : 3.24;
+      else if (a.el === 'O') t += dbl ? 17.07 : h ? 20.23 : 9.23;
+    });
+    return t;
+  }
+  // Reglas de "parecido a fármaco". Sin logP (no se calcula): se indica en cada nota.
+  function rules(d) {
+    const c = (k, v, ok) => [k, v, ok], f1 = x => +x.toFixed(1), out = [];
+    const add = (id, name, cond, note, tol) => { const bad = cond.filter(x => !x[2]).length; out.push({ id, name, ok: bad <= (tol || 0), bad, cond, note }); };
+    add('lipinski', 'Lipinski (regla de 5)', [c('Masa ≤ 500', f1(d.mw), d.mw <= 500), c('Donadores H ≤ 5', d.hbd, d.hbd <= 5), c('Aceptores H ≤ 10', d.hba, d.hba <= 10)], 'Absorción oral. Se permite 1 violación. Sin el criterio de logP.', 1);
+    add('veber', 'Veber', [c('Enlaces rotables ≤ 10', d.rot, d.rot <= 10), c('TPSA ≤ 140 Å²', f1(d.tpsa), d.tpsa <= 140)], 'Biodisponibilidad oral (TPSA aproximada).');
+    add('egan', 'Egan', [c('TPSA ≤ 131,6 Å²', f1(d.tpsa), d.tpsa <= 131.6)], 'Absorción intestinal. Sin el criterio de logP.');
+    add('muegge', 'Muegge', [c('Masa 200–600', f1(d.mw), d.mw >= 200 && d.mw <= 600), c('Anillos ≤ 7', d.rings, d.rings <= 7), c('Carbonos > 4', d.carbons, d.carbons > 4), c('Heteroátomos > 1', d.hetero, d.hetero > 1), c('Rotables ≤ 15', d.rot, d.rot <= 15), c('Aceptores H ≤ 10', d.hba, d.hba <= 10), c('Donadores H ≤ 5', d.hbd, d.hbd <= 5), c('TPSA ≤ 150 Å²', f1(d.tpsa), d.tpsa <= 150)], 'Filtro de calidad de fármaco. Sin XlogP.');
+    add('lead', 'Parecido a cabeza de serie (Oprea)', [c('Masa 200–450', f1(d.mw), d.mw >= 200 && d.mw <= 450), c('Rotables ≤ 7', d.rot, d.rot <= 7), c('Anillos ≤ 4', d.rings, d.rings <= 4)], 'Buenos puntos de partida para optimizar. Sin logP.');
+    add('rule3', 'Regla de 3 (fragmentos)', [c('Masa ≤ 300', f1(d.mw), d.mw <= 300), c('Donadores H ≤ 3', d.hbd, d.hbd <= 3), c('Aceptores H ≤ 3', d.hba, d.hba <= 3), c('Rotables ≤ 3', d.rot, d.rot <= 3), c('TPSA ≤ 60 Å²', f1(d.tpsa), d.tpsa <= 60)], 'Moléculas pequeñas para construir fármacos. Sin logP.');
+    add('ghose', 'Ghose (parcial)', [c('Masa 160–480', f1(d.mw), d.mw >= 160 && d.mw <= 480), c('Átomos totales 20–70', d.total, d.total >= 20 && d.total <= 70)], 'Sin los criterios de logP ni refractividad.');
+    return out;
+  }
   function descr(m) {
     const n = m.atoms.length, nb = nbrs(m), c = counts(m); let comp = 0; const seen = new Array(n).fill(false);
     for (let s = 0; s < n; s++) if (!seen[s]) { comp++; const q = [s]; seen[s] = true; for (let h = 0; h < q.length; h++) nb[q[h]].forEach(([v]) => { if (!seen[v]) { seen[v] = true; q.push(v); } }); }
@@ -214,8 +225,10 @@
     m.atoms.forEach((a, i) => { if (a.el === 'N' || a.el === 'O') { hba++; hbd += hcount(m, i, nb) ? 1 : 0; } });
     m.bonds.forEach(([a, b, o]) => { if (o === 1 && nb[a].length > 1 && nb[b].length > 1 && !inRing(a, b)) rot++; });
     const mw = mass(m, c), heavy = n, total = Object.values(c).reduce((t, x) => t + x, 0);
-    return { formula: formula(m, c), mw, heavy, total, bonds: m.bonds.length, rings: Math.max(0, m.bonds.length - n + comp), hbd, hba, rot, lipinski: mw <= 500 && hbd <= 5 && hba <= 10 && rot <= 10, counts: c };
+    let cn = 0, csp3 = 0; m.atoms.forEach((a, i) => { if (a.el === 'C') { cn++; if (!nb[i].some(x => x[1] >= 2)) csp3++; } });
+    const hetero = Object.keys(c).filter(k => k !== 'C' && k !== 'H').reduce((t, k) => t + c[k], 0), tp = tpsa(m, nb);
+    return { formula: formula(m, c), mw, heavy, total, bonds: m.bonds.length, rings: Math.max(0, m.bonds.length - n + comp), hbd, hba, rot, tpsa: tp, fsp3: cn ? csp3 / cn : 0, carbons: cn, hetero, lipinski: mw <= 500 && hbd <= 5 && hba <= 10 && rot <= 10, counts: c };
   }
-  const API = { eig3, EL, PALETTE, nbrs, hcount, counts, formula, mass, canon, relax, layout, center, hyd, toMol, toSDF, toXYZ, parseSDF, toSmiles, descr, clone, unit, sub, add, mul, dot, len };
+  const API = { eig3, EL, FAMILIES, ZORDER, maxv, nbrs, hcount, counts, formula, mass, canon, relax, layout, center, hyd, toMol, toSDF, toXYZ, parseSDF, toSmiles, descr, rules, clone, unit, sub, add, mul, dot, len };
   if (typeof module !== 'undefined') module.exports = API; else g.Chem = API;
 })(typeof window !== 'undefined' ? window : globalThis);

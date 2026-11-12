@@ -8,9 +8,13 @@
 4. Un chequeo automático valida que la fórmula coincida con el SMILES y te dice la línea exacta si falla.
 5. Al aprobarse, `assets/biblioteca.json` se regenera solo.
 
+### Añadir un compuesto desbloqueable
+Usa la categoría `Desbloqueables` y agrega al final el identificador del reto que lo abre (por ejemplo `|tabla-5`). Los retos están en `assets/app.js` (lista `MIS`).
+
 ## Cambiar la app
 El código está en `assets/` (sin compilar):
-- `chem.js`: modelo, fórmulas, reconocimiento, geometría, formatos de archivo.
+- `chem.js`: modelo, fórmulas, reconocimiento, geometría, reglas de fármaco, formatos de archivo.
+- `elementos.js` (generado con `python3 tools/build_elementos.py`): la tabla periódica.
 - `view.js`: dibujo en canvas y gestos táctiles.
 - `app.js` + `app.css` + `index.html`: interfaz y temas.
 

@@ -49,9 +49,9 @@ La app ya es código abierto y editable. Pendientes conocidos: integrar ChEMBL, 
 ## 7. Estructura
 ```
 index.html  sw.js  manifest.webmanifest  icon-*.png  favicon.svg
-assets/    app.css · chem.js · view.js · app.js · biblioteca.json (generado)
+assets/    app.css · app.js · view.js · chem.js · elementos.js (gen.) · biblioteca.json (gen.) · liquid-glass.js
 data/      moleculas.txt
-tools/     build_biblioteca.py
+tools/     build_biblioteca.py · build_elementos.py
 docs/      guías y decisiones de arquitectura (ADR)
 .github/   flujo automático y plantillas
 ```

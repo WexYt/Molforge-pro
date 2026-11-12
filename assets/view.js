@@ -1,7 +1,7 @@
 /* WEX MolForge Pro · view.js — visor/editor 3D en canvas con gestos táctiles (MIT) */
 (function (g) {
   const C = g.Chem, EL = C.EL;
-  const MAXV = { C: 4, H: 1, F: 1, Cl: 1, Br: 1, I: 1, N: 5, O: 3, B: 3, Si: 4, Al: 3, Li: 1, Na: 1, K: 1, Mg: 2, Ca: 2, Zn: 2, Fe: 3, Cu: 2, Se: 6, S: 6, P: 5, As: 5, He: 0, Ne: 0, Ar: 0, Kr: 0, Xe: 0 };
+  const MAXV = new Proxy({}, { get: (_, e) => C.maxv(e) });  // valencia máxima por elemento (tabla completa)
   const BOND = 'rgba(214,222,236,.92)';
   const mix = (hex, t) => { const n = parseInt(hex.slice(1), 16), r = n >> 16, gg = (n >> 8) & 255, b = n & 255, f = t < 0 ? 0 : 255, k = Math.abs(t); return 'rgb(' + Math.round(r + (f - r) * k) + ',' + Math.round(gg + (f - gg) * k) + ',' + Math.round(b + (f - b) * k) + ')'; };
   const mm = (A, B) => A.map(r => [0, 1, 2].map(j => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
