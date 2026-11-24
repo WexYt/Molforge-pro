@@ -1,0 +1,28 @@
+name: Biblioteca
+on:
+  pull_request:
+    paths: ['data/moleculas.txt', 'tools/**']
+  push:
+    branches: [main]
+    paths: ['data/moleculas.txt', 'tools/**', 'VERSION']
+permissions:
+  contents: write
+jobs:
+  validar:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/build_biblioteca.py --validate
+  construir:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/build_biblioteca.py
+      - name: Guardar cambios si la biblioteca cambió
+        run: |
+          git config user.name "wex-bot"
+          git config user.email "wex-bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "Reconstruir biblioteca" && git push)
