@@ -1,8 +1,12 @@
 /* WEX MolForge Pro · chem.js — motor químico sin dependencias (MIT)
-   Modelo: {atoms:[{el,x,y,z}], bonds:[[a,b,orden]]}. Los hidrógenos se completan solos por valencia. */
+   Modelo: {atoms:[{el,x,y,z}], bonds:[[a,b,orden]]}.
+   Hidrógenos: por defecto se completan solos por valencia (AUTO_H); con
+   setAutoH(false) son átomos reales que el usuario añade a mano.
+   logP: estimador de Moriguchi (MLOGP, 1992) — es una estimación, no un valor medido. */
 (function (g) {
   // Tabla periódica completa: viene de elementos.js (generado). [nombre, masa, r.cov, r.vdW, valencia, color, Z, familia, valencia máx.]
   const _W = typeof module !== 'undefined' ? require('./elementos.js') : g.WEX_ELEMENTS, EL = _W.E, FAMILIES = _W.F, ZORDER = _W.Z, maxv = e => EL[e][8];
+  let AUTO_H = true; // true = los H se completan solos por valencia; false = H manual (átomos reales)
   const rad = d => d * Math.PI / 180;
   const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], mul = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], len = a => Math.hypot(a[0], a[1], a[2]);
@@ -10,8 +14,27 @@
   const P3 = a => [a.x, a.y, a.z];
   const clone = m => ({ atoms: m.atoms.map(a => ({ el: a.el, x: a.x, y: a.y, z: a.z })), bonds: m.bonds.map(b => b.slice()) });
 
-  function nbrs(m) { const n = m.atoms.map(() => []); m.bonds.forEach(([a, b, o]) => { n[a].push([b, o]); n[b].push([a, o]); }); return n; }
-  function hcount(m, i, nb) { nb = nb || nbrs(m); return Math.max(0, EL[m.atoms[i].el][4] - nb[i].reduce((t, x) => t + x[1], 0)); }
+  function nbrs(m) { const n = m.atoms.map(() => []); m.bonds.forEach(([a, b, o], bi) => { n[a].push([b, o, bi]); n[b].push([a, o, bi]); }); return n; }
+  function hcountImp(m, i, nb) { nb = nb || nbrs(m); return Math.max(0, EL[m.atoms[i].el][4] - nb[i].reduce((t, x) => t + x[1], 0)); }
+  // H implícitos de un átomo en la molécula tal como se ve: 0 en modo manual.
+  function hcount(m, i, nb) { return AUTO_H ? hcountImp(m, i, nb) : 0; }
+  // H totales de un átomo: H reales unidos a él + H implícitos por valencia.
+  // Es lo que usan fórmula, reconocimiento, reglas y logP, igual en los dos modos.
+  function hTot(m, i, nb) { nb = nb || nbrs(m); return nb[i].filter(([j]) => m.atoms[j].el === 'H').length + hcount(m, i, nb); }
+  // Convierte los H implícitos en átomos H reales (con enlace a su átomo padre).
+  function explicitize(m) {
+    const prev = AUTO_H; AUTO_H = true; const H = hyd(m); AUTO_H = prev;
+    const out = clone(m);
+    H.forEach(h => { const j = out.atoms.length; out.atoms.push({ el: 'H', x: h.x, y: h.y, z: h.z }); out.bonds.push([h.p, j, 1]); });
+    return out;
+  }
+  // Quita los átomos H reales (y sus enlaces): la molécula "colapsada" de átomos pesados.
+  function collapseH(m) {
+    const keep = m.atoms.map(a => a.el !== 'H'), map = [], atoms = [];
+    m.atoms.forEach((a, i) => { if (keep[i]) { map[i] = atoms.length; atoms.push({ el: a.el, x: a.x, y: a.y, z: a.z }); } });
+    return { atoms, bonds: m.bonds.filter(b => keep[b[0]] && keep[b[1]]).map(b => [map[b[0]], map[b[1]], b[2]]) };
+  }
+  function setAutoH(v) { AUTO_H = !!v; return AUTO_H; }
   function counts(m) {
     const nb = nbrs(m), c = {};
     m.atoms.forEach((a, i) => { c[a.el] = (c[a.el] || 0) + 1; const h = hcount(m, i, nb); if (h) c.H = (c.H || 0) + h; });
@@ -27,10 +50,18 @@
   // Huella canónica (refinamiento tipo Weisfeiler-Lehman) para reconocer moléculas de la biblioteca
   function hash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
   function canon(m) {
-    if (!m.atoms.length) return '';
-    const nb = nbrs(m); let L = m.atoms.map((a, i) => hash(a.el + hcount(m, i, nb)));
+    // Huella sobre el grafo de átomos pesados; la etiqueta de cada átomo lleva
+    // sus H totales (reales + implícitos), así el reconocimiento es el mismo
+    // en modo automático y en modo manual.
+    const nb0 = nbrs(m), hT = m.atoms.map((a, i) => hTot(m, i, nb0));
+    const keep = m.atoms.map(a => a.el !== 'H'), map = [], atoms = [], inv = [];
+    m.atoms.forEach((a, i) => { if (keep[i]) { map[i] = atoms.length; inv.push(i); atoms.push(a.el); } });
+    const cm = { atoms: atoms.map(el => ({ el, x: 0, y: 0, z: 0 })), bonds: m.bonds.filter(b => keep[b[0]] && keep[b[1]]).map(b => [map[b[0]], map[b[1]], b[2]]) };
+    const hC = inv.map(i => hT[i]);
+    if (!cm.atoms.length) return '';
+    const nb = nbrs(cm); let L = cm.atoms.map((a, i) => hash(a.el + hC[i]));
     for (let k = 0; k < 6; k++) L = L.map((l, i) => hash(l + '(' + nb[i].map(([j, o]) => o + L[j]).sort().join(',') + ')'));
-    return formula(m) + '|' + m.bonds.length + '|' + L.slice().sort().join('.');
+    return formula(m) + '|' + cm.bonds.length + '|' + L.slice().sort().join('.');
   }
 
   // ---------- geometría ----------
@@ -132,8 +163,10 @@
   function center(m) { const n = m.atoms.length || 1, c = [0, 0, 0]; m.atoms.forEach(a => { c[0] += a.x; c[1] += a.y; c[2] += a.z; }); return [c[0] / n, c[1] / n, c[2] / n]; }
 
   // ---------- hidrógenos derivados (siguen a su átomo; no se editan) ----------
+  // En modo manual no hay H derivados: los H son átomos reales de la molécula.
   function ortho(b) { const a = Math.abs(b[0]) < .8 ? [1, 0, 0] : [0, 1, 0]; return unit(sub(a, mul(b, dot(a, b)))); }
   function hyd(m) {
+    if (!AUTO_H) return [];
     const nb = nbrs(m), H = [];
     m.atoms.forEach((a, i) => {
       const h = hcount(m, i, nb); if (!h) return;
@@ -179,11 +212,18 @@
     return { atoms, bonds };
   }
   function toSmiles(m) {
+    // Los H reales no se recorren como átomos: cuentan como H del átomo al que
+    // están unidos (hTot), igual que los implícitos. Así el SMILES es el mismo
+    // en modo automático y en modo manual.
+    const nb0 = nbrs(m), hT = m.atoms.map((a, i) => hTot(m, i, nb0));
+    const keep = m.atoms.map(a => a.el !== 'H'), map = [], inv = [];
+    m.atoms.forEach((a, i) => { if (keep[i]) { map[i] = inv.length; inv.push(i); } });
+    m = { atoms: inv.map(i => m.atoms[i]), bonds: m.bonds.filter(b => keep[b[0]] && keep[b[1]]).map(b => [map[b[0]], map[b[1]], b[2]]) };
     const n = m.atoms.length, nb = nbrs(m), vis = new Array(n).fill(0), tree = new Set(), back = {}, cl = m.atoms.map(() => []); let rid = 1;
     const key = (a, b) => a < b ? a + '_' + b : b + '_' + a;
     const dfs = (u, p) => { vis[u] = 1; nb[u].forEach(([v, o]) => { const k = key(u, v); if (!vis[v]) { tree.add(k); dfs(v, u); } else if (v !== p && !tree.has(k) && !back[k]) { back[k] = rid; cl[u].push([rid, o]); cl[v].push([rid, o]); rid++; } }); };
     const sym = o => o === 2 ? '=' : o === 3 ? '#' : '', ORG = { B: 3, C: 4, N: 3, O: 2, P: 3, S: 2, F: 1, Cl: 1, Br: 1, I: 1 }, done = new Set(), seen = new Array(n).fill(false);
-    const atom = i => { const el = m.atoms[i].el, h = hcount(m, i, nb), s = nb[i].reduce((t, x) => t + x[1], 0); return ORG[el] && ORG[el] === s + h ? el : '[' + el + (h ? 'H' + (h > 1 ? h : '') : '') + ']'; };
+    const atom = i => { const el = m.atoms[i].el, h = hT[inv[i]], s = nb[i].reduce((t, x) => t + x[1], 0); return ORG[el] && ORG[el] === s + h ? el : '[' + el + (h ? 'H' + (h > 1 ? h : '') : '') + ']'; };
     const gen = (u, p) => {
       seen[u] = true; let s = atom(u);
       cl[u].forEach(([id, o]) => { s += (done.has(id) ? '' : sym(o)) + (id > 9 ? '%' + id : id); done.add(id); });
@@ -198,37 +238,189 @@
   function tpsa(m, nb) {
     let t = 0;
     m.atoms.forEach((a, i) => {
-      const h = hcount(m, i, nb), dbl = nb[i].some(x => x[1] === 2), tri = nb[i].some(x => x[1] === 3), conj = nb[i].some(x => unsat(nb, x[0]));
+      const h = hTot(m, i, nb), dbl = nb[i].some(x => x[1] === 2), tri = nb[i].some(x => x[1] === 3), conj = nb[i].some(x => unsat(nb, x[0]));
       if (a.el === 'N') t += tri ? 23.79 : dbl ? (h ? 23.85 : 12.36) : h >= 2 ? 26.02 : h === 1 ? (conj ? 15.79 : 12.03) : 3.24;
       else if (a.el === 'O') t += dbl ? 17.07 : h ? 20.23 : 9.23;
     });
     return t;
   }
-  // Reglas de "parecido a fármaco". Sin logP (no se calcula): se indica en cada nota.
+  // ---------- logP estimado por Moriguchi (MLOGP, 1992) ----------
+  // Moriguchi et al., Chem. Pharm. Bull. 1992, 40, 127-130; 1994, 42, 976-978.
+  // Fórmula cerrada con 13 descriptores estructurales. Es una ESTIMACIÓN
+  // (r² ≈ 0,91 en el trabajo original; error típico 0,5-1 unidad): no sustituye
+  // un valor medido. Solo se usan C, H, N, O, S, P y halógenos; con otros
+  // elementos el resultado es menos fiable y se marca como tal.
+  function cyclesUpTo(m, nb, maxLen) { // ciclos simples hasta maxLen (cada uno una vez)
+    const n = m.atoms.length, out = [], seen = new Set();
+    const dfs = (s, u, path) => {
+      if (path.length > maxLen || out.length > 400) return;
+      for (const [v] of nb[u]) {
+        if (v === s) { if (path.length >= 3) { const key = [...path].sort((a, b) => a - b).join(','); if (!seen.has(key)) { seen.add(key); out.push(path.slice()); } } continue; }
+        if (v < s || path.includes(v)) continue;
+        path.push(v); dfs(s, v, path); path.pop();
+      }
+    };
+    for (let s = 0; s < n; s++) dfs(s, s, [s]);
+    return out;
+  }
+  function logp(m) {
+    // Trabaja sobre la molécula tal como está (los H reales cuentan como H del
+    // átomo al que están unidos, igual que los implícitos).
+    if (!m.atoms.length) return null;
+    const nb = nbrs(m), el = i => m.atoms[i].el, osum = i => nb[i].reduce((t, x) => t + x[1], 0);
+    const hasH = i => hTot(m, i, nb) > 0;
+    const isCarbonyl = i => el(i) === 'C' && nb[i].some(([j, o]) => el(j) === 'O' && o === 2);
+    const isCarboxyl = i => el(i) === 'C' && nb[i].some(([j, o]) => el(j) === 'O' && o === 2) && nb[i].some(([j, o]) => el(j) === 'O' && o === 1 && hasH(j));
+    // CX: C y halógenos ponderados
+    let CX = 0; m.atoms.forEach(a => { CX += { C: 1, F: .5, Cl: 1, Br: 1.5, I: 2 }[a.el] || 0; });
+    // NO: número total de N y O
+    let NO = 0; m.atoms.forEach(a => { if (a.el === 'N' || a.el === 'O') NO++; });
+    // PRX: proximidad N/O (2 si están unidos, 1 si hay un C, S o P entre medias)
+    const D = topoDist(nb), NOi = m.atoms.map((a, i) => (a.el === 'N' || a.el === 'O') ? i : -1).filter(i => i >= 0);
+    let PRX = 0;
+    for (let a = 0; a < NOi.length; a++) for (let b = a + 1; b < NOi.length; b++) {
+      const d = D[NOi[a]][NOi[b]];
+      if (d === 1) PRX += 2;
+      else if (d === 2) { const mid = nb[NOi[a]].find(([j]) => D[j][NOi[b]] === 1); if (mid && ['C', 'S', 'P'].includes(el(mid[0]))) PRX += 1; }
+    }
+    m.atoms.forEach((a, i) => { // corrección -1 por amida (-CON<) y sulfonamida (-SO2N<)
+      if (a.el !== 'N') return;
+      nb[i].forEach(([j]) => {
+        if (el(j) === 'C' && isCarbonyl(j)) PRX -= 1;
+        if (el(j) === 'S' && nb[j].filter(([k, o]) => el(k) === 'O' && o === 2).length >= 2) PRX -= 1;
+      });
+    });
+    // Grupos nitro: N con 2 o más O (al menos uno en doble enlace)
+    const nitroN = new Set();
+    m.atoms.forEach((a, i) => { if (a.el !== 'N') return; const oN = nb[i].filter(([j]) => el(j) === 'O'); if (oN.length >= 2 && oN.some(([, o]) => o === 2)) nitroN.add(i); });
+    // UB: enlaces insaturados, sin contar los del grupo nitro
+    let UB = 0;
+    m.bonds.forEach(([a, b, o]) => { if (o < 2) return; if ((nitroN.has(a) && el(b) === 'O') || (nitroN.has(b) && el(a) === 'O')) return; UB += 1; });
+    // Anillos: un ciclo es "aromático" si es de 6 con 3 dobles enlaces, o de 5 con
+    // 2 dobles enlaces y un heteroátomo (furano, tiofeno, pirrol, imidazol...).
+    const cyc = cyclesUpTo(m, nb, 7);
+    const aromLike = c => {
+      const dbl = c.reduce((t, v, k) => { const w = c[(k + 1) % c.length], e = nb[v].find(([j]) => j === w); return t + (e && e[1] === 2 ? 1 : 0); }, 0);
+      if (c.length === 6 && dbl === 3) return true;
+      if (c.length === 5 && dbl === 2 && c.some(v => el(v) !== 'C')) return true;
+      return false;
+    };
+    const ringAtoms = new Set(); cyc.forEach(c => c.forEach(v => ringAtoms.add(v)));
+    const RNG = cyc.some(c => !aromLike(c)) ? 1 : 0;
+    // HB: puente de hidrógeno intramolecular (aprox.): -OH en un átomo de anillo
+    // con un aceptor (C=O, -NH2 o -COOH, o N del anillo) en el átomo vecino del anillo.
+    let HB = 0;
+    const ohRing = new Set(), accRing = new Set();
+    m.atoms.forEach((a, i) => {
+      if (a.el === 'O' && hasH(i)) nb[i].forEach(([j]) => { if (ringAtoms.has(j)) ohRing.add(j); });
+    });
+    ringAtoms.forEach(r => {
+      if (el(r) === 'N') accRing.add(r);
+      nb[r].forEach(([j]) => {
+        if (ringAtoms.has(j)) return;
+        if (el(j) === 'N' && hasH(j)) accRing.add(r);
+        if (isCarbonyl(j) || isCarboxyl(j)) accRing.add(r);
+      });
+    });
+    ohRing.forEach(a => { nb[a].forEach(([b]) => { if (accRing.has(b)) HB = 1; }); });
+    // POL: sustituyentes polares sobre anillos aromáticos (máx. 4)
+    let POL = 0;
+    cyc.filter(aromLike).forEach(c => c.forEach(v => nb[v].forEach(([j]) => { if (!c.includes(j) && ['N', 'O', 'S', 'F', 'Cl', 'Br', 'I'].includes(el(j))) POL += 1; })));
+    POL = Math.min(4, POL);
+    // AMP: anfótero (α-aminoácido = 1; ácido aminobenzoico o piridincarboxílico = 0,5)
+    let AMP = 0;
+    m.atoms.forEach((a, i) => {
+      if (el(i) !== 'C') return;
+      const hasN = nb[i].some(([j]) => el(j) === 'N'), hasCOOH = nb[i].some(([j]) => isCarboxyl(j));
+      if (hasN && hasCOOH) AMP = 1;
+    });
+    if (!AMP) cyc.filter(aromLike).forEach(c => {
+      let nh2 = false, cooh = false, ringN = c.some(v => el(v) === 'N');
+      c.forEach(v => nb[v].forEach(([j]) => {
+        if (c.includes(j)) return;
+        if (el(j) === 'N' && hasH(j)) nh2 = true;
+        if (isCarboxyl(j)) cooh = true;
+      }));
+      if ((nh2 && cooh) || (ringN && cooh)) AMP = .5;
+    });
+    // ALK: hidrocarburo con 0 o 1 doble enlace, o cadena de carbonos de 7 o más.
+    // La cadena se mide solo por enlaces acíclicos C–C (el contorno de un anillo
+    // no es una cadena).
+    let ALK = 0;
+    const hetero = m.atoms.some(a => !['C', 'H'].includes(a.el));
+    if (!hetero && UB <= 1) ALK = 1;
+    else {
+      const ringBond = new Set();
+      m.bonds.forEach(([a, b], bi) => {
+        const seen = new Set([a]), q = [a];
+        for (let h = 0; h < q.length; h++) nb[q[h]].forEach(([v, , oi]) => { if (oi !== bi && !seen.has(v)) { seen.add(v); q.push(v); } });
+        if (seen.has(b)) ringBond.add(bi);
+      });
+      const cIdx = m.atoms.map((a, i) => a.el === 'C' ? i : -1).filter(i => i >= 0);
+      let longest = 0;
+      cIdx.forEach(s => { const d = new Array(m.atoms.length).fill(-1); d[s] = 0; const q = [s]; for (let h = 0; h < q.length; h++) nb[q[h]].forEach(([v, , oi]) => { if (el(v) === 'C' && !ringBond.has(oi) && d[v] < 0) { d[v] = d[q[h]] + 1; q.push(v); } }); longest = Math.max(longest, ...d.filter(x => x >= 0)); });
+      if (longest + 1 >= 7) ALK = 1;
+    }
+    // QN: nitrógeno cuaternario (4 vecinos) = 1; N-óxido = 0,5
+    let QN = 0;
+    m.atoms.forEach((a, i) => {
+      if (a.el !== 'N') return;
+      if (nb[i].length >= 4) QN += 1;
+      else if (nb[i].length === 3 && osum(i) === 4 && nb[i].some(([j, o]) => el(j) === 'O' && o === 2)) QN += .5;
+    });
+    // NCS: isotiocianato (-N=C=S) = 1; tiocianato (-S-C≡N) = 0,5
+    let NCS = 0;
+    m.bonds.forEach(([a, b, o]) => {
+      if (o === 2 && ((el(a) === 'N' && el(b) === 'C') || (el(a) === 'C' && el(b) === 'N'))) {
+        const c = el(a) === 'C' ? a : b;
+        if (nb[c].some(([j, o2]) => el(j) === 'S' && o2 === 2)) NCS += 1;
+      }
+      if (o === 3 && ((el(a) === 'C' && el(b) === 'N') || (el(a) === 'N' && el(b) === 'C'))) {
+        const c = el(a) === 'C' ? a : b;
+        if (nb[c].some(([j, o2]) => el(j) === 'S' && o2 === 1)) NCS += .5;
+      }
+    });
+    // BLM: β-lactama (anillo de 4 con N y C=O)
+    let BLM = 0;
+    cyc.filter(c => c.length === 4).forEach(c => {
+      const hasN = c.some(v => el(v) === 'N'), hasCO = c.some(v => isCarbonyl(v));
+      if (hasN && hasCO) BLM = 1;
+    });
+    const v = -1.041 + 1.244 * Math.pow(CX, .6) - 1.017 * Math.pow(NO, .9) + .406 * PRX - .145 * Math.pow(UB, .8)
+      + .511 * HB + .268 * POL - 2.215 * AMP + .912 * ALK - .392 * RNG - 3.684 * QN
+      + .474 * nitroN.size + 1.582 * NCS + .773 * BLM;
+    const otherEl = m.atoms.some(a => !['C', 'H', 'N', 'O', 'S', 'P', 'F', 'Cl', 'Br', 'I'].includes(a.el));
+    return { v, d: { CX, NO, PRX, UB, HB, POL, AMP, ALK, RNG, QN, NO2: nitroN.size, NCS, BLM }, approx: otherEl };
+  }
+  // Reglas de "parecido a fármaco". El logP es el estimado de Moriguchi (ver logp).
   function rules(d) {
-    const c = (k, v, ok) => [k, v, ok], f1 = x => +x.toFixed(1), out = [];
+    const c = (k, v, ok) => [k, v, ok], f1 = x => +x.toFixed(1), f2 = x => +(Math.round(x * 100) / 100).toFixed(2), out = [];
     const add = (id, name, cond, note, tol) => { const bad = cond.filter(x => !x[2]).length; out.push({ id, name, ok: bad <= (tol || 0), bad, cond, note }); };
-    add('lipinski', 'Lipinski (regla de 5)', [c('Masa ≤ 500', f1(d.mw), d.mw <= 500), c('Donadores H ≤ 5', d.hbd, d.hbd <= 5), c('Aceptores H ≤ 10', d.hba, d.hba <= 10)], 'Absorción oral. Se permite 1 violación. Sin el criterio de logP.', 1);
+    const lp = d.logp == null ? null : f2(d.logp);
+    add('lipinski', 'Lipinski (regla de 5)', [c('Masa ≤ 500', f1(d.mw), d.mw <= 500), c('Donadores H ≤ 5', d.hbd, d.hbd <= 5), c('Aceptores H ≤ 10', d.hba, d.hba <= 10), c('logP ≤ 5', lp, lp == null || lp <= 5)], 'Absorción oral. Se permite 1 violación. logP estimado (Moriguchi).', 1);
     add('veber', 'Veber', [c('Enlaces rotables ≤ 10', d.rot, d.rot <= 10), c('TPSA ≤ 140 Å²', f1(d.tpsa), d.tpsa <= 140)], 'Biodisponibilidad oral (TPSA aproximada).');
-    add('egan', 'Egan', [c('TPSA ≤ 131,6 Å²', f1(d.tpsa), d.tpsa <= 131.6)], 'Absorción intestinal. Sin el criterio de logP.');
-    add('muegge', 'Muegge', [c('Masa 200–600', f1(d.mw), d.mw >= 200 && d.mw <= 600), c('Anillos ≤ 7', d.rings, d.rings <= 7), c('Carbonos > 4', d.carbons, d.carbons > 4), c('Heteroátomos > 1', d.hetero, d.hetero > 1), c('Rotables ≤ 15', d.rot, d.rot <= 15), c('Aceptores H ≤ 10', d.hba, d.hba <= 10), c('Donadores H ≤ 5', d.hbd, d.hbd <= 5), c('TPSA ≤ 150 Å²', f1(d.tpsa), d.tpsa <= 150)], 'Filtro de calidad de fármaco. Sin XlogP.');
-    add('lead', 'Parecido a cabeza de serie (Oprea)', [c('Masa 200–450', f1(d.mw), d.mw >= 200 && d.mw <= 450), c('Rotables ≤ 7', d.rot, d.rot <= 7), c('Anillos ≤ 4', d.rings, d.rings <= 4)], 'Buenos puntos de partida para optimizar. Sin logP.');
-    add('rule3', 'Regla de 3 (fragmentos)', [c('Masa ≤ 300', f1(d.mw), d.mw <= 300), c('Donadores H ≤ 3', d.hbd, d.hbd <= 3), c('Aceptores H ≤ 3', d.hba, d.hba <= 3), c('Rotables ≤ 3', d.rot, d.rot <= 3), c('TPSA ≤ 60 Å²', f1(d.tpsa), d.tpsa <= 60)], 'Moléculas pequeñas para construir fármacos. Sin logP.');
-    add('ghose', 'Ghose (parcial)', [c('Masa 160–480', f1(d.mw), d.mw >= 160 && d.mw <= 480), c('Átomos totales 20–70', d.total, d.total >= 20 && d.total <= 70)], 'Sin los criterios de logP ni refractividad.');
+    add('egan', 'Egan', [c('TPSA ≤ 131,6 Å²', f1(d.tpsa), d.tpsa <= 131.6), c('logP ≤ 5,88', lp, lp == null || lp <= 5.88)], 'Absorción intestinal. logP estimado (Moriguchi).');
+    add('muegge', 'Muegge', [c('Masa 200–600', f1(d.mw), d.mw >= 200 && d.mw <= 600), c('Anillos ≤ 7', d.rings, d.rings <= 7), c('Carbonos > 4', d.carbons, d.carbons > 4), c('Heteroátomos > 1', d.hetero, d.hetero > 1), c('Rotables ≤ 15', d.rot, d.rot <= 15), c('Aceptores H ≤ 10', d.hba, d.hba <= 10), c('Donadores H ≤ 5', d.hbd, d.hbd <= 5), c('TPSA ≤ 150 Å²', f1(d.tpsa), d.tpsa <= 150), c('logP −2 a 5', lp, lp == null || (lp >= -2 && lp <= 5))], 'Filtro de calidad de fármaco. logP estimado (Moriguchi).');
+    add('lead', 'Parecido a cabeza de serie (Oprea)', [c('Masa 200–450', f1(d.mw), d.mw >= 200 && d.mw <= 450), c('Rotables ≤ 7', d.rot, d.rot <= 7), c('Anillos ≤ 4', d.rings, d.rings <= 4), c('logP ≤ 4,5', lp, lp == null || lp <= 4.5)], 'Buenos puntos de partida para optimizar. logP estimado (Moriguchi).');
+    add('rule3', 'Regla de 3 (fragmentos)', [c('Masa ≤ 300', f1(d.mw), d.mw <= 300), c('Donadores H ≤ 3', d.hbd, d.hbd <= 3), c('Aceptores H ≤ 3', d.hba, d.hba <= 3), c('Rotables ≤ 3', d.rot, d.rot <= 3), c('TPSA ≤ 60 Å²', f1(d.tpsa), d.tpsa <= 60), c('logP ≤ 3', lp, lp == null || lp <= 3)], 'Moléculas pequeñas para construir fármacos. logP estimado (Moriguchi).');
+    add('ghose', 'Ghose', [c('Masa 160–480', f1(d.mw), d.mw >= 160 && d.mw <= 480), c('Átomos totales 20–70', d.total, d.total >= 20 && d.total <= 70), c('logP −0,4 a 5,6', lp, lp == null || (lp >= -0.4 && lp <= 5.6))], 'Sin el criterio de refractividad molar. logP estimado (Moriguchi).');
+    add('pfizer', 'Pfizer 3/75', [c('No (logP > 3 y TPSA < 75)', lp == null ? '—' : (lp > 3 && d.tpsa < 75 ? 'riesgo' : 'bien'), lp == null || !(lp > 3 && d.tpsa < 75))], 'Combinar logP alto con TPSA baja multiplica el riesgo de toxicidad in vivo. logP estimado (Moriguchi).');
     return out;
   }
   function descr(m) {
+    // Datos de la molécula tal como está dibujada (en modo manual los H son
+    // solo los que el usuario añadió; en automático se completan por valencia).
     const n = m.atoms.length, nb = nbrs(m), c = counts(m); let comp = 0; const seen = new Array(n).fill(false);
     for (let s = 0; s < n; s++) if (!seen[s]) { comp++; const q = [s]; seen[s] = true; for (let h = 0; h < q.length; h++) nb[q[h]].forEach(([v]) => { if (!seen[v]) { seen[v] = true; q.push(v); } }); }
     const inRing = (a, b) => { const q = [a], s = new Set([a]); for (let h = 0; h < q.length; h++) for (const [v] of nb[q[h]]) { if (q[h] === a && v === b) continue; if (v === b) return true; if (!s.has(v)) { s.add(v); q.push(v); } } return false; };
     let hbd = 0, hba = 0, rot = 0;
-    m.atoms.forEach((a, i) => { if (a.el === 'N' || a.el === 'O') { hba++; hbd += hcount(m, i, nb) ? 1 : 0; } });
+    m.atoms.forEach((a, i) => { if (a.el === 'N' || a.el === 'O') { hba++; hbd += hTot(m, i, nb) ? 1 : 0; } });
     m.bonds.forEach(([a, b, o]) => { if (o === 1 && nb[a].length > 1 && nb[b].length > 1 && !inRing(a, b)) rot++; });
-    const mw = mass(m, c), heavy = n, total = Object.values(c).reduce((t, x) => t + x, 0);
+    const mw = mass(m, c), heavy = m.atoms.filter(a => a.el !== 'H').length, total = Object.values(c).reduce((t, x) => t + x, 0);
     let cn = 0, csp3 = 0; m.atoms.forEach((a, i) => { if (a.el === 'C') { cn++; if (!nb[i].some(x => x[1] >= 2)) csp3++; } });
-    const hetero = Object.keys(c).filter(k => k !== 'C' && k !== 'H').reduce((t, k) => t + c[k], 0), tp = tpsa(m, nb);
-    return { formula: formula(m, c), mw, heavy, total, bonds: m.bonds.length, rings: Math.max(0, m.bonds.length - n + comp), hbd, hba, rot, tpsa: tp, fsp3: cn ? csp3 / cn : 0, carbons: cn, hetero, lipinski: mw <= 500 && hbd <= 5 && hba <= 10 && rot <= 10, counts: c };
+    const hetero = Object.keys(c).filter(k => k !== 'C' && k !== 'H').reduce((t, k) => t + c[k], 0), tp = tpsa(m, nb), lp = logp(m);
+    return { formula: formula(m, c), mw, heavy, total, bonds: m.bonds.length, rings: Math.max(0, m.bonds.length - n + comp), hbd, hba, rot, tpsa: tp, fsp3: cn ? csp3 / cn : 0, carbons: cn, hetero, logp: lp ? lp.v : null, logpDesc: lp ? lp.d : null, logpApprox: lp ? lp.approx : false, lipinski: mw <= 500 && hbd <= 5 && hba <= 10 && (lp == null || lp.v <= 5), counts: c };
   }
-  const API = { eig3, EL, FAMILIES, ZORDER, maxv, nbrs, hcount, counts, formula, mass, canon, relax, layout, center, hyd, toMol, toSDF, toXYZ, parseSDF, toSmiles, descr, rules, clone, unit, sub, add, mul, dot, len };
+  const API = { eig3, EL, FAMILIES, ZORDER, maxv, nbrs, hcount, hcountImp, counts, formula, mass, canon, relax, layout, center, hyd, toMol, toSDF, toXYZ, parseSDF, toSmiles, descr, rules, logp, clone, unit, sub, add, mul, dot, len, setAutoH, autoH: () => AUTO_H, explicitize, collapseH };
   if (typeof module !== 'undefined') module.exports = API; else g.Chem = API;
 })(typeof window !== 'undefined' ? window : globalThis);

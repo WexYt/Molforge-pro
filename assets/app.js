@@ -1,4 +1,4 @@
-/* WEX MolForge Pro v0.6 beta · app.js — interfaz móvil, tableta y escritorio (MIT) */
+/* WEX MolForge Pro v0.8 beta · app.js — interfaz móvil, tableta y escritorio (MIT) */
 (function () {
   const C = Chem, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], EL = C.EL;
   const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -28,7 +28,32 @@
   function dayLabel(ts) { const d = new Date(ts), n = new Date(), y = new Date(Date.now() - 864e5); return d.toDateString() === n.toDateString() ? 'Hoy' : d.toDateString() === y.toDateString() ? 'Ayer' : fmtDate(ts); }
 
   // ---------- retos y progreso ----------
-  const LV = ['Aprendiz', 'Explorador', 'Alquimista', 'Químico', 'Maestro', 'Arquitecto molecular', 'Leyenda'], XPL = 150;
+  const LV = ['Aprendiz', 'Explorador', 'Alquimista', 'Químico', 'Maestro', 'Arquitecto molecular', 'Leyenda'];
+  // Umbrales fijos de nivel (ADR-004): el nivel 7 es exactamente 950 XP, la suma
+  // de los 16 retos. No hay nivel 8.
+  const LVXP = [0, 100, 250, 420, 620, 800, 950];
+  // Emblemas de nivel (SVG en línea, uno por nivel).
+  const EMBLEMS = [
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#2f6fed"/><path d="M28 12h8v14l9 15a7 7 0 0 1-6 10H25a7 7 0 0 1-6-10l9-15z" fill="#fff"/><path d="M25 36h14l3 5a3 3 0 0 1-2.6 4.5H24.6A3 3 0 0 1 22 41z" fill="#7dd3fc"/></svg>',
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#0ea5a4"/><circle cx="32" cy="32" r="16" fill="none" stroke="#fff" stroke-width="3"/><path d="M32 16l4 12 12 4-12 4-4 12-4-12-12-4 12-4z" fill="#fff"/></svg>',
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#8b5cf6"/><path d="M32 12l6 13 14 2-10 10 2 14-12-7-12 7 2-14-10-10 14-2z" fill="#fff"/></svg>',
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#059669"/><path d="M32 14l15 9v18l-15 9-15-9V23z" fill="none" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="5" fill="#fff"/><circle cx="32" cy="23" r="3" fill="#fff"/><circle cx="24" cy="36.5" r="3" fill="#fff"/><circle cx="40" cy="36.5" r="3" fill="#fff"/></svg>',
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#d97706"/><circle cx="32" cy="32" r="7" fill="#fff"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="#fff" stroke-width="2.5" transform="rotate(-25 32 32)"/><ellipse cx="32" cy="32" rx="22" ry="9" fill="none" stroke="#fff" stroke-width="2.5" transform="rotate(25 32 32)"/></svg>',
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#db2777"/><circle cx="22" cy="24" r="5" fill="#fff"/><circle cx="42" cy="22" r="5" fill="#fff"/><circle cx="32" cy="44" r="5" fill="#fff"/><path d="M22 24l20-2M22 24l10 20M42 22l-10 22" stroke="#fff" stroke-width="2.5"/></svg>',
+    '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#f59e0b"/><path d="M14 44l-3-12 10 4 7-12 4 10 6-8 4 12 10-4-3 12a8 8 0 0 1-8 6H22a8 8 0 0 1-8-6z" fill="#fff"/><circle cx="32" cy="52" r="2.5" fill="#fff"/></svg>'
+  ];
+  const emblem = l => EMBLEMS[Math.min(EMBLEMS.length - 1, Math.max(0, l - 1))];
+  const level = () => { let l = 1; for (let i = 1; i < LVXP.length; i++) if (P.xp >= LVXP[i]) l = i + 1; return l; };
+  const lvName = l => LV[Math.min(LV.length - 1, l - 1)];
+  // Logro final: se desbloquea al completar los 16 retos o al llegar a 950 XP.
+  const finalUnlocked = () => MIS.every(m => P.done[m.id]) || P.xp >= 950;
+  // Repara partidas guardadas: el XP nunca puede ser menor que la suma de los
+  // retos cumplidos (+15 por cada descubrimiento).
+  function repairXP() {
+    const expected = MIS.reduce((t, m) => t + (P.done[m.id] ? m.xp : 0), 0) + 15 * Object.keys(P.disc).length;
+    if (P.xp < expected) { P.xp = expected; saveP(); }
+    return expected;
+  }
   const MIS = [
     { id: 'primer-atomo', t: 'Primer átomo', d: 'Coloca un átomo en el lienzo.', goal: 1, xp: 40, get: () => P.c.atoms || 0 },
     { id: 'primera-molecula', t: 'Primera molécula', d: 'Crea desde cero una molécula de 3 o más átomos.', goal: 1, xp: 60, get: () => P.f.mol3 ? 1 : 0 },
@@ -46,20 +71,12 @@
     { id: 'reglas-3', t: 'Farmacéutico', d: 'Consulta las reglas de fármaco 3 veces.', goal: 3, xp: 60, get: () => P.c.rules || 0 },
     { id: 'historial-5', t: 'Cronista', d: 'Acumula 5 moléculas en tu historial.', goal: 5, xp: 50, get: () => S.hist.length },
     { id: 'descargar-1', t: 'Exportador', d: 'Descarga una molécula (SDF, MOL, XYZ, JSON o PNG).', goal: 1, xp: 40, get: () => P.c.dl || 0 }];
-  const level = () => 1 + Math.floor(P.xp / XPL), lvName = l => LV[Math.min(LV.length - 1, l - 1)];
   const isLocked = e => !!e.u && !P.done[e.u], rewardOf = id => S.lib.find(e => e.u === id), misOf = id => MIS.find(m => m.id === id);
-  function addXP(n) { const a = level(); P.xp += n; if (level() > a) setTimeout(() => toast('¡Nivel ' + level() + '! ' + lvName(level())), 1200); }
-  function evaluate() {
-    let any = false;
-    MIS.forEach(m => { if (!P.done[m.id] && m.get() >= m.goal) { P.done[m.id] = Date.now(); addXP(m.xp); any = true; const r = rewardOf(m.id); toast('Reto cumplido: ' + m.t + (r ? ' · ¡' + r.n + ' desbloqueado!' : '') + ' +' + m.xp + ' XP'); if (navigator.vibrate && S.haptic) navigator.vibrate([10, 40, 14]); S.popId = m.id; } });
-    if (any) { saveP(); if (S.lib.length) { buildChips(); renderList(true); } if ($('#tab-retos').classList.contains('on')) renderRetos(); }
-  }
-  const bump = (k, n) => { P.c[k] = (P.c[k] || 0) + (n || 1); saveP(); evaluate(); };
-  function discover(e) { if (P.disc[e.s]) return; P.disc[e.s] = Date.now(); addXP(15); saveP(); toast('¡Descubriste ' + e.n + '! +15 XP'); evaluate(); }
   function renderRetos() {
-    const l = level(), into = P.xp % XPL, done = MIS.filter(m => P.done[m.id]).length;
+    const l = level(), done = MIS.filter(m => P.done[m.id]).length, base = LVXP[l - 1], next = l < LVXP.length ? LVXP[l] : null;
+    const into = P.xp - base, span = next === null ? 0 : next - base;
     $('#retos-sub').textContent = done + ' de ' + MIS.length + ' retos · ' + P.xp + ' XP';
-    $('#lvl').innerHTML = '<div class="bdg">' + l + '</div><div class="t"><b>' + lvName(l) + '</b><small>' + into + ' / ' + XPL + ' XP para el nivel ' + (l + 1) + '</small><div class="meter"><i style="width:' + Math.round(into / XPL * 100) + '%"></i></div></div>';
+    $('#lvl').innerHTML = '<div class="lv-emblem">' + emblem(l) + '</div><div class="bdg">' + l + '</div><div class="t"><b>' + lvName(l) + '</b><small>' + (next === null ? 'Nivel máximo · ' + P.xp + ' XP' : into + ' / ' + span + ' XP para el nivel ' + (l + 1)) + '</small><div class="meter"><i style="width:' + (next === null ? 100 : Math.round(into / span * 100)) + '%"></i></div></div>';
     $('#missions').innerHTML = MIS.map(m => {
       const g = Math.min(m.get(), m.goal), ok = !!P.done[m.id], r = rewardOf(m.id);
       return '<div class="mis' + (ok ? ' done' : '') + (S.popId === m.id ? ' pop' : '') + '"><span class="st">' + (ok ? '<svg class="ic" style="width:18px;height:18px"><use href="#i-check"/></svg>' : g + '/' + m.goal) + '</span><div><b>' + m.t + '</b><small>' + m.d + '</small><div class="rw">' + (ok ? 'Desbloqueaste: ' + (r ? r.n : '') : 'Premio: un compuesto misterioso · +' + m.xp + ' XP') + '</div></div></div>';
@@ -67,13 +84,31 @@
     $('#unlocks').innerHTML = S.lib.filter(e => e.u).map(e => isLocked(e) ? '<div class="utile"><svg class="ic"><use href="#i-lock"/></svg><b>???</b><small>' + misOf(e.u).t + '</small></div>' : '<button class="utile on" data-s="' + e.s + '">' + dotsHTML(e.dots) + '<b>' + e.n + '</b><small>' + e.f + '</small></button>').join('');
     $$('#unlocks .utile[data-s]').forEach(b => b.onclick = () => openEntry(S.lib.find(e => e.s === b.dataset.s)));
     $('#disc').innerHTML = '<b style="color:var(--fg)">' + Object.keys(P.disc).length + ' de ' + S.lib.length + '</b> compuestos descubiertos. Cuentan cuando construyes tú mismo una molécula y la app la reconoce (abrirla de la biblioteca o buscarla en PubChem no cuenta).';
+    const fu = finalUnlocked(), fb = $('#final-unlock');
+    fb.innerHTML = fu
+      ? '<div class="lv-emblem">' + emblem(7) + '</div><div><b>Logro final desbloqueado</b><small>Capas de electrones y orbitales 3D s, p, d y f</small></div><button class="sheet-btn" id="fu-go" style="margin-left:auto">Ver orbitales</button>'
+      : '<svg class="ic" style="width:26px;height:26px;flex:none"><use href="#i-lock"/></svg><div><b>Logro final: orbitales 3D</b><small>Completa los 16 retos (' + done + '/16) o llega a 950 XP (' + P.xp + '/950)</small></div>';
+    const gob = $('#fu-go'); if (gob) gob.onclick = () => { go('orbitales'); tick(); };
   }
+  // Celebración de nivel/logro: se ve ~2.6 s; si llega otra, se pone en cola.
+  let celebQ = [], celebBusy = false;
+  function showCelebration(title, sub, svg) { celebQ.push([title, sub, svg]); if (!celebBusy) nextCeleb(); }
+  function nextCeleb() { const c = celebQ.shift(); if (!c) { celebBusy = false; return; } celebBusy = true; const el = $('#celebrate'); el.innerHTML = '<div class="cel-emblem">' + c[2] + '</div><b>' + esc(c[0]) + '</b><span>' + esc(c[1]) + '</span>'; el.classList.add('show'); tick(); if (navigator.vibrate && S.haptic) navigator.vibrate([20, 60, 30]); setTimeout(() => { el.classList.remove('show'); setTimeout(nextCeleb, 350); }, 2600); }
+  function addXP(n) { const a = level(); P.xp += n; if (level() > a) { const l = level(); setTimeout(() => showCelebration('¡Nivel ' + l + '!', lvName(l), emblem(l)), 600); } }
+  function evaluate() {
+    let any = false;
+    MIS.forEach(m => { if (!P.done[m.id] && m.get() >= m.goal) { P.done[m.id] = Date.now(); addXP(m.xp); any = true; const r = rewardOf(m.id); toast('Reto cumplido: ' + m.t + (r ? ' · ¡' + r.n + ' desbloqueado!' : '') + ' +' + m.xp + ' XP'); if (navigator.vibrate && S.haptic) navigator.vibrate([10, 40, 14]); S.popId = m.id; } });
+    if (any) { saveP(); if (S.lib.length) { buildChips(); renderList(true); } if ($('#tab-retos').classList.contains('on')) renderRetos(); }
+    if (finalUnlocked() && !P.f.orb) { P.f.orb = 1; saveP(); showCelebration('¡Logro final!', 'Orbitales 3D desbloqueados', emblem(7)); toast('¡Logro final! Ya puedes ver las capas de electrones y los orbitales 3D'); if ($('#tab-orbitales').classList.contains('on')) renderOrbitales(); }
+  }
+  const bump = (k, n) => { P.c[k] = (P.c[k] || 0) + (n || 1); saveP(); evaluate(); };
+  function discover(e) { if (P.disc[e.s]) return; P.disc[e.s] = Date.now(); addXP(15); saveP(); toast('¡Descubriste ' + e.n + '! +15 XP'); evaluate(); }
 
   // ---------- navegación ----------
   function go(name) {
     if (wide() && name === 'lab') { requestAnimationFrame(() => V.resize()); return; }
     $$('.tab').forEach(t => t.classList.toggle('on', t.id === 'tab-' + name)); $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.go === name));
-    if (name === 'retos') renderRetos(); if (name === 'lab') requestAnimationFrame(() => V.resize());
+    if (name === 'retos') renderRetos(); if (name === 'orbitales') renderOrbitales(); if (name === 'lab') requestAnimationFrame(() => V.resize());
   }
   $$('#tabbar button').forEach(b => b.onclick = () => { go(b.dataset.go); tick(); });
   function setSub(s) {
@@ -82,6 +117,40 @@
   }
   $$('#seg button').forEach(b => b.onclick = () => { setSub(b.dataset.sub); tick(); });
   const fixWide = () => { if (wide() && $('#tab-lab').classList.contains('on')) go('explorar'); setTimeout(() => V.resize(), 60); }; addEventListener('resize', fixWide);
+
+  // ---------- orbitales 3D (logro final) ----------
+  function renderOrbitales() {
+    const fu = finalUnlocked(), done = MIS.filter(m => P.done[m.id]).length;
+    $('#orb-locked').hidden = fu; $('#orb-unlocked').hidden = !fu;
+    if (!fu) { $('#orb-locked-txt').textContent = 'Completa los 16 retos (' + done + '/16) o llega a 950 XP (' + P.xp + '/950) para desbloquear las capas de electrones y los orbitales 3D.'; return; }
+    if (!window.Orb) { $('#orb-cfg').textContent = 'No se pudo cargar el módulo de orbitales.'; return; }
+    const sel = $('#orb-el');
+    if (!sel.options.length) sel.innerHTML = C.ZORDER.map(e => '<option value="' + EL[e][6] + '">' + EL[e][6] + ' · ' + EL[e][0] + ' (' + e + ')</option>').join('');
+    if (!S.orbZ) { const m = V.getMol(), first = m.atoms.find(a => a.el !== 'H'); S.orbZ = first ? EL[first.el][6] : 26; }
+    sel.value = String(S.orbZ);
+    if (!S.orbView) S.orbView = Orb.OrbView($('#orb-cv'));
+    const draw = () => {
+      const z = +sel.value; S.orbZ = z; S.orbMode = S.orbMode || 'shells';
+      const cfg = Orb.configString(z), sh = Orb.shells(z).filter(Boolean);
+      $('#orb-cfg').innerHTML = '<b>' + EL[C.ZORDER[z - 1]][0] + ' (' + C.ZORDER[z - 1] + ') · Z ' + z + '</b><br>Configuración: ' + cfg + '<br>Capas K L M N O P Q: ' + sh.join(' · ') + ' electrones<br>Electrones de valencia: ' + Orb.valence(z);
+      const subs = Object.keys(Orb.config(z)).map(k => k[1]).filter((v, i, a) => a.indexOf(v) === i);
+      $('#orb-modes').innerHTML = '<button data-m="shells" class="' + (S.orbMode === 'shells' ? 'on' : '') + '">Capas 3D</button>' + subs.map(l => '<button data-m="' + l + '" class="' + (S.orbMode === l ? 'on' : '') + '">Orbital ' + l + '</button>').join('');
+      $$('#orb-modes button').forEach(b => b.onclick = () => { S.orbMode = b.dataset.m; S.orbVar = 'all'; draw(); tick(); });
+      const mode = S.orbMode;
+      if (mode === 'shells') { $('#orb-vars').innerHTML = '<span class="muted small">Arrastra para girar · pellizca o usa la rueda para acercar.</span>'; S.orbView.setMode('shells'); }
+      else {
+        const vs = Orb.FN[mode];
+        $('#orb-vars').innerHTML = '<button data-v="all" class="' + (S.orbVar === 'all' ? 'on' : '') + '">Todos</button>' + vs.map((v, i) => '<button data-v="' + i + '" class="' + (String(S.orbVar) === String(i) ? 'on' : '') + '">' + v[0] + '</button>').join('');
+        $$('#orb-vars button').forEach(b => b.onclick = () => { S.orbVar = b.dataset.v === 'all' ? 'all' : +b.dataset.v; draw(); tick(); });
+        S.orbView.setMode(mode, S.orbVar === undefined ? 'all' : S.orbVar);
+      }
+      S.orbView.setElement(z);
+      requestAnimationFrame(() => S.orbView && S.orbView.resize());
+    };
+    sel.onchange = () => { S.orbMode = 'shells'; S.orbVar = 'all'; draw(); tick(); };
+    draw();
+  }
+  $('#orb-goto-retos').onclick = () => { go('retos'); tick(); };
 
   // ---------- biblioteca y buscador ----------
   function indexLib(d) {
@@ -230,7 +299,7 @@
   // nombre, elementos, datos y reglas
   let nameLook = 0; const cache = new Map();
   function setName(n, sub) { const h = $('#mname'); if (h.textContent !== n) { h.textContent = n; h.classList.remove('flip'); void h.offsetWidth; h.classList.add('flip'); } $('#mmeta').textContent = sub || ''; }
-  const tilesHTML = d => { const T = (b, s) => '<div class="tile"><b>' + b + '</b><small>' + s + '</small></div>'; return '<div class="tiles">' + T(d.formula, 'Fórmula') + T(d.mw.toFixed(2), 'g/mol') + T(d.total, 'Átomos') + T(d.bonds, 'Enlaces') + T(d.rings, 'Anillos') + T(d.rot, 'Rotables') + T(d.hbd, 'Donadores H') + T(d.hba, 'Aceptores H') + T(d.tpsa.toFixed(0), 'TPSA Å² (aprox.)') + '</div>'; };
+  const tilesHTML = d => { const T = (b, s) => '<div class="tile"><b>' + b + '</b><small>' + s + '</small></div>'; return '<div class="tiles">' + T(d.formula, 'Fórmula') + T(d.mw.toFixed(2), 'g/mol') + T(d.total, 'Átomos') + T(d.bonds, 'Enlaces') + T(d.rings, 'Anillos') + T(d.rot, 'Rotables') + T(d.hbd, 'Donadores H') + T(d.hba, 'Aceptores H') + T(d.tpsa.toFixed(0), 'TPSA Å² (aprox.)') + T(d.logp === null || d.logp === undefined ? '—' : d.logp.toFixed(2), 'logP (Moriguchi, est.)') + '</div>'; };
   const rulesHTML = d => '<div class="rules">' + C.rules(d).map(r => '<details class="' + (r.ok ? '' : 'no') + '"><summary><span class="rs"><svg class="ic"><use href="#' + (r.ok ? 'i-check' : 'i-x') + '"/></svg></span>' + r.name + '</summary><div class="cn">' + r.cond.map(c => '<span class="' + (c[2] ? '' : 'bad') + '">' + c[0] + ' · ' + c[1] + '</span>').join('') + '</div><p class="nt">' + r.note + '</p></details>').join('') + '</div>';
   function info() {
     const m = V.getMol(); nameLook++;
@@ -292,7 +361,7 @@
   function save(fn, data, mime) { const b = data instanceof Blob ? data : new Blob([data], { type: mime }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); toast('Descargado: ' + fn); }
   function sheetData() {
     const m = V.getMol(); if (!m.atoms.length) return openSheet('<h3>Datos y reglas</h3><p class="muted">Coloca algunos átomos para ver sus datos.</p>');
-    const d = C.descr(m); openSheet('<h3>' + esc(S.cur.name) + '</h3>' + tilesHTML(d) + '<h3 style="margin-top:16px;font-size:1rem">Reglas de fármaco</h3>' + rulesHTML(d) + '<p class="muted small" style="margin-top:8px">Calculadas a partir de la estructura; sin logP. Toca una regla para ver sus criterios.</p>');
+    const d = C.descr(m); openSheet('<h3>' + esc(S.cur.name) + '</h3>' + tilesHTML(d) + '<h3 style="margin-top:16px;font-size:1rem">Reglas de fármaco</h3>' + rulesHTML(d) + '<p class="muted small" style="margin-top:8px">Calculadas a partir de la estructura. El logP es una estimación por el método de Moriguchi (1984/1992): sirve para comparar, no es un valor medido. Toca una regla para ver sus criterios.</p>');
   }
   function sheetDown() {
     const m = V.getMol(); if (!m.atoms.length) return openSheet('<h3>Descargar</h3><p class="muted">Crea o abre una molécula primero.</p>');
@@ -308,8 +377,8 @@
     });
   }
   function sheetOpts() {
-    const map = { 'o-h': 'showH', 'o-l': 'labels', 'o-s': 'spin', 'o-e': 'elastic' }, row = (id, t, s) => '<label class="sw-row"><span>' + t + '<small>' + s + '</small></span><input type="checkbox" id="' + id + '"' + (S.opts[map[id]] ? ' checked' : '') + '></label>';
-    openSheet('<h3>Opciones</h3><div class="card list-s">' + row('o-e', 'Arrastre elástico', 'Al mover un átomo, los demás lo siguen.') + row('o-h', 'Mostrar hidrógenos', 'Se completan solos según la valencia.') + row('o-l', 'Etiquetas de elemento', 'Símbolo sobre cada átomo.') + row('o-s', 'Rotación automática', 'Gira despacio cuando no la tocas.') + '</div><div class="stack" style="margin-top:12px"><button class="sheet-btn" id="o-re">Reorganizar desde cero</button><button class="sheet-btn danger" id="o-clr">Limpiar lienzo</button></div>');
+    const map = { 'o-h': 'showH', 'o-l': 'labels', 'o-s': 'spin', 'o-e': 'elastic' }, row = (id, t, s) => '<label class="sw-row"><span>' + t + '<small>' + s + '</small></span><input type="checkbox" id="' + id + '"' + (S.opts[map[id]] ? ' checked' : '') + (id === 'o-h' && S.manualH ? ' disabled' : '') + '></label>';
+    openSheet('<h3>Opciones</h3><div class="card list-s">' + row('o-e', 'Arrastre elástico', 'Al mover un átomo, los demás lo siguen.') + row('o-h', 'Mostrar hidrógenos', 'Se completan solos según la valencia.') + row('o-l', 'Etiquetas de elemento', 'Símbolo sobre cada átomo.') + row('o-s', 'Rotación automática', 'Gira despacio cuando no la tocas.') + '</div>' + (S.manualH ? '<p class="muted small" style="margin-top:8px">Hidrógeno manual activado (Ajustes): los H solo se añaden a mano, así que «Mostrar hidrógenos» no tiene efecto.</p>' : '') + '<div class="stack" style="margin-top:12px"><button class="sheet-btn" id="o-re">Reorganizar desde cero</button><button class="sheet-btn danger" id="o-clr">Limpiar lienzo</button></div>');
     Object.keys(map).forEach(id => $('#' + id).onchange = e => { S.opts[map[id]] = e.target.checked; V.setOpts(S.opts); store.set('wex-opts', S.opts); tick(); });
     $('#o-re').onclick = () => { cb.snap(); V.reorganize(); closeSheet(); };
     $('#o-clr').onclick = () => { const prev = C.clone(V.getMol()); setMolecule({ atoms: [], bonds: [] }); S.undo = [prev]; btns(); closeSheet(); };
@@ -358,6 +427,18 @@
   });
   $('#st-online').checked = S.pc; $('#st-online').onchange = e => { S.pc = e.target.checked; store.set('wex-pc', S.pc); };
   $('#st-haptic').checked = S.haptic; $('#st-haptic').onchange = e => { S.haptic = e.target.checked; store.set('wex-haptic', S.haptic); };
+  S.manualH = store.get('wex-manual-h', false); C.setAutoH(!S.manualH);
+  $('#st-manual-h').checked = S.manualH; $('#st-manual-h').onchange = e => { setManualH(e.target.checked); tick(); };
+  $('#prof-share').onclick = () => { shareAchievements(); tick(); };
+  $('#prof-view').onclick = () => { viewShareCode(); tick(); };
+  $('#prof-export').onclick = () => { exportAll(); tick(); };
+  $('#prof-import').onclick = () => $('#file-profile').click();
+  $('#file-profile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importAll(f); });
+  $('#prof-rename').onclick = () => {
+    const p = getProfile();
+    openSheet('<h3>Tu nombre en MolForge</h3><p class="muted small">Se muestra cuando compartes tus logros. Tu código único no cambia.</p><input class="sheet-in" id="pf-name" maxlength="30" value="' + esc(p.name) + '"><div class="stack"><button class="sheet-btn" id="pf-ok" style="justify-content:center;background:var(--primary);color:var(--on);border-color:transparent">Guardar nombre</button></div>');
+    $('#pf-ok').onclick = () => { const n = ($('#pf-name').value || '').trim(); if (n) { p.name = n; store.set('wex-profile', p); renderProfile(); } closeSheet(); toast('Nombre guardado'); };
+  };
   $('#st-reset').onclick = () => { openSheet('<h3>¿Reiniciar retos?</h3><p class="muted small">Se borran tus XP, retos cumplidos y descubrimientos, y los compuestos desbloqueables vuelven a bloquearse. Tu historial y tus moléculas guardadas no se tocan.</p><div class="stack"><button class="sheet-btn danger" id="y">Reiniciar</button><button class="sheet-btn" id="n">Cancelar</button></div>'); $('#n').onclick = closeSheet; $('#y').onclick = () => { Object.assign(P, { xp: 0, done: {}, c: {}, f: {}, disc: {}, opened: {}, themes: {}, fams: {} }); saveP(); closeSheet(); buildChips(); renderList(true); renderRetos(); toast('Retos reiniciados'); }; };
   let deferred; addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#btn-install').hidden = false; });
   $('#btn-install').onclick = async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('#btn-install').hidden = true; };
@@ -368,6 +449,88 @@
   }
   addEventListener('online', () => { toast('Conexión recuperada'); renderList(true); }); addEventListener('offline', () => { toast('Sin conexión · la biblioteca sigue disponible'); renderList(true); });
 
+  // ---------- perfil (Ajustes): usuario único, compartir logros, traspaso de datos ----------
+  // Sin servidor: el usuario y su código se generan en el dispositivo. El código
+  // es informativo (sin servidor no se puede garantizar que sea único en el mundo).
+  const CODE_ALPH = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const randCode = n => { let s = ''; const a = new Uint8Array(n); crypto.getRandomValues(a); a.forEach(v => s += CODE_ALPH[v % CODE_ALPH.length]); return s; };
+  const b64u = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const unb64u = s => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))));
+  function getProfile() {
+    let p = store.get('wex-profile', null);
+    if (!p || !p.code) { p = { name: 'Químico ' + randCode(3), code: randCode(6), created: Date.now() }; store.set('wex-profile', p); }
+    return p;
+  }
+  function renderProfile() {
+    const p = getProfile();
+    $('#prof-name').textContent = p.name;
+    $('#prof-code').textContent = '#' + p.code;
+    $('#prof-xp').textContent = P.xp + ' XP · nivel ' + level() + ' (' + lvName(level()) + ') · ' + MIS.filter(m => P.done[m.id]).length + '/' + MIS.length + ' retos';
+  }
+  function shareAchievements() {
+    const p = getProfile();
+    const payload = { v: 1, u: p.name, c: p.code, xp: P.xp, lvl: level(), done: MIS.filter(m => P.done[m.id]).map(m => m.id), disc: Object.keys(P.disc).length };
+    const code = 'WEX1.' + b64u(payload);
+    openSheet('<h3>Compartir mis logros</h3><p class="muted small">Este código dice quién eres y cuántos retos llevas. No lleva tus moléculas ni tu historial. Quien lo reciba puede ver tus logros pegándolo en Ajustes → Ver logros de un código.</p><textarea class="sheet-in" id="sh-code" readonly rows="3" style="font-size:.8rem">' + code + '</textarea><div class="stack"><button class="sheet-btn" id="sh-copy" style="justify-content:center;background:var(--primary);color:var(--on);border-color:transparent">Copiar código</button></div>');
+    $('#sh-copy').onclick = async () => { try { await navigator.clipboard.writeText(code); toast('Código copiado'); } catch (e) { $('#sh-code').select(); document.execCommand('copy'); toast('Código copiado'); } };
+  }
+  function viewShareCode() {
+    openSheet('<h3>Ver logros de un código</h3><p class="muted small">Pega un código WEX1. de otra persona para ver sus logros (solo lectura).</p><textarea class="sheet-in" id="vw-code" rows="3" placeholder="WEX1.…"></textarea><div class="stack"><button class="sheet-btn" id="vw-ok" style="justify-content:center;background:var(--primary);color:var(--on);border-color:transparent">Ver logros</button></div><div id="vw-out" style="margin-top:10px"></div>');
+    $('#vw-ok').onclick = () => {
+      const raw = ($('#vw-code').value || '').trim();
+      try {
+        if (!raw.startsWith('WEX1.')) throw new Error('El código debe empezar por WEX1.');
+        const j = unb64u(raw.slice(5));
+        if (j.v !== 1 || !j.u || !j.c) throw new Error('Código no válido');
+        $('#vw-out').innerHTML = '<div class="card list-s"><b>' + esc(j.u) + ' · #' + esc(j.c) + '</b><br><span class="muted small">' + (j.xp || 0) + ' XP · nivel ' + (j.lvl || 1) + ' · ' + (j.done ? j.done.length : 0) + '/16 retos · ' + (j.disc || 0) + ' descubrimientos</span></div>';
+      } catch (e) { $('#vw-out').innerHTML = '<p class="muted small">No se pudo leer ese código: ' + esc(e.message) + '</p>'; }
+    };
+  }
+  function exportAll() {
+    const data = { app: 'wex-molforge', v: 1, exported: new Date().toISOString(), profile: getProfile(), prog: P, hist: S.hist, mine: S.mine, opts: S.opts, manualH: S.manualH };
+    save('wex-molforge-respaldo.json', JSON.stringify(data, null, 1), 'application/json');
+  }
+  function importAll(file) {
+    const rd = new FileReader();
+    rd.onload = () => {
+      let j; try { j = JSON.parse(rd.result); } catch (e) { return toast('Archivo no válido'); }
+      if (j.app !== 'wex-molforge' || !j.prog) return toast('Ese archivo no es un respaldo de MolForge');
+      openSheet('<h3>Importar respaldo</h3><p class="muted small">Respaldo de <b>' + esc((j.profile && j.profile.name) || '?') + '</b> · ' + (j.prog.xp || 0) + ' XP · ' + (j.mine ? j.mine.length : 0) + ' moléculas guardadas.</p><div class="stack"><button class="sheet-btn" id="im-merge">Fusionar con lo que tengo</button><button class="sheet-btn" id="im-repl">Reemplazar todo lo mío</button><button class="sheet-btn" id="im-no">Cancelar</button></div>');
+      $('#im-no').onclick = closeSheet;
+      const apply = merge => {
+        if (merge) {
+          P.xp = Math.max(P.xp, j.prog.xp || 0);
+          Object.assign(P.done, j.prog.done || {}); Object.assign(P.disc, j.prog.disc || {}); Object.assign(P.opened, j.prog.opened || {});
+          Object.keys(j.prog.c || {}).forEach(k => P.c[k] = Math.max(P.c[k] || 0, j.prog.c[k]));
+          Object.assign(P.f, j.prog.f || {}); Object.assign(P.themes, j.prog.themes || {}); Object.assign(P.fams, j.prog.fams || {});
+          const haveM = new Set(S.mine.map(x => x.id)); (j.mine || []).forEach(x => { if (x.id && x.m && !haveM.has(x.id)) S.mine.push(x); });
+          const haveH = new Set(S.hist.map(x => x.id)); (j.hist || []).forEach(x => { if (x.id && !haveH.has(x.id)) S.hist.push(x); });
+          S.hist.sort((a, b) => b.ts - a.ts); S.hist = S.hist.slice(0, 80);
+        } else {
+          Object.assign(P, { xp: j.prog.xp || 0, done: j.prog.done || {}, c: j.prog.c || {}, f: j.prog.f || {}, disc: j.prog.disc || {}, opened: j.prog.opened || {}, themes: j.prog.themes || {}, fams: j.prog.fams || {} });
+          S.mine = j.mine || []; S.hist = j.hist || [];
+          if (j.profile) store.set('wex-profile', j.profile);
+        }
+        repairXP(); saveP(); saveMine(); store.set('wex-hist', S.hist);
+        if (j.manualH !== undefined) setManualH(!!j.manualH);
+        closeSheet(); buildChips(); renderList(true); renderRetos(); renderProfile(); toast(merge ? 'Respaldo fusionado' : 'Respaldo importado');
+      };
+      $('#im-merge').onclick = () => apply(true);
+      $('#im-repl').onclick = () => apply(false);
+    };
+    rd.readAsText(file);
+  }
+  function setManualH(on) {
+    if (on === S.manualH) return;
+    cb.snap();
+    if (on) V.setMol(C.explicitize(V.getMol()), { keepView: true });
+    else V.setMol(C.collapseH(V.getMol()), { keepView: true });
+    S.manualH = on; C.setAutoH(!on); store.set('wex-manual-h', on);
+    const sw = $('#st-manual-h'); if (sw) sw.checked = on;
+    const oh = $('#o-h'); if (oh) oh.disabled = on;
+    info(); toast(on ? 'Hidrógeno manual: añade los H a mano' : 'Hidrógeno automático: se completan solos');
+  }
+
   // ---------- arranque ----------
   (async function init() {
     applyTheme(document.documentElement.dataset.theme || 'oscuro'); splash(18, 'Cargando biblioteca…');
@@ -376,8 +539,9 @@
       await new Promise(r => setTimeout(r, 30)); indexLib(d); buildChips(); renderList(true); splash(85, 'Preparando el laboratorio…');
     } catch (e) { $('#list').innerHTML = '<p class="empty">No se pudo cargar la biblioteca. Abre la app con internet una vez.</p>'; }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {}); offlineState();
+    repairXP(); renderProfile();
     drawFams(); drawPalette(); saveMine(); V.setMol({ atoms: [], bonds: [] }); info(); selectTool('move'); seen.clear(); fixWide(); splash(100, 'Listo');
     setTimeout(() => { const s = $('#splash'); s.classList.add('out'); setTimeout(() => { s.remove(); GL.sync(); }, 600); }, Math.max(0, 900 - (performance.now() - t0)));
   })();
-  window.__wex = { S, P, V, openEntry, setMolecule, info, evaluate, GL };
+  window.__wex = { S, P, V, openEntry, setMolecule, info, evaluate, GL, level, lvName, repairXP, finalUnlocked, getProfile, renderProfile, setManualH, renderOrbitales, showCelebration, MIS };
 })();
