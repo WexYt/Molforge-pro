@@ -1,4 +1,4 @@
-/* WEX MolForge Pro v0.8 beta · app.js — interfaz móvil, tableta y escritorio (MIT) */
+/* WEX MolForge Pro v0.8.1 beta · app.js — interfaz móvil, tableta y escritorio (MIT) */
 (function () {
   const C = Chem, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], EL = C.EL;
   const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -7,7 +7,8 @@
   const t0 = performance.now(), PUG = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug', uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const S = { lib: [], cats: [], byCanon: new Map(), cat: 'Todas', q: '', list: [], shown: 0, sub: 'lib', fam: 'frec', undo: [], redo: [], tool: 'move', cur: { name: '', formula: '' }, sess: { id: uid(), kind: 'crea' },
     pc: store.get('wex-pc', true), haptic: store.get('wex-haptic', true), opts: Object.assign({ showH: true, labels: false, spin: false, elastic: true }, store.get('wex-opts', {})),
-    hist: store.get('wex-hist', []), mine: store.get('wex-mine', []) };
+    hist: store.get('wex-hist', []), mine: store.get('wex-mine', []),
+    sug: store.get('wex-sugerencias', []), comm: { ts: 0, items: null } };
   const P = Object.assign({ xp: 0, done: {}, c: {}, f: {}, disc: {}, opened: {}, themes: {}, fams: {} }, store.get('wex-prog', {}));
   const saveP = () => store.set('wex-prog', P), wide = () => matchMedia('(min-width:720px)').matches, desk = () => matchMedia('(min-width:1000px)').matches;
 
@@ -86,8 +87,8 @@
     $('#disc').innerHTML = '<b style="color:var(--fg)">' + Object.keys(P.disc).length + ' de ' + S.lib.length + '</b> compuestos descubiertos. Cuentan cuando construyes tú mismo una molécula y la app la reconoce (abrirla de la biblioteca o buscarla en PubChem no cuenta).';
     const fu = finalUnlocked(), fb = $('#final-unlock');
     fb.innerHTML = fu
-      ? '<div class="lv-emblem">' + emblem(7) + '</div><div><b>Logro final desbloqueado</b><small>Capas de electrones y orbitales 3D s, p, d y f</small></div><button class="sheet-btn" id="fu-go" style="margin-left:auto">Ver orbitales</button>'
-      : '<svg class="ic" style="width:26px;height:26px;flex:none"><use href="#i-lock"/></svg><div><b>Logro final: orbitales 3D</b><small>Completa los 16 retos (' + done + '/16) o llega a 950 XP (' + P.xp + '/950)</small></div>';
+      ? '<div class="final-top"><div class="lv-emblem">' + emblem(7) + '</div><div><b>Logro final desbloqueado</b><small>Capas de electrones y orbitales 3D s, p, d y f</small></div></div><button class="sheet-btn" id="fu-go">Ver orbitales</button>'
+      : '<div class="final-top"><svg class="ic" style="width:26px;height:26px;flex:none"><use href="#i-lock"/></svg><div><b>Logro final: orbitales 3D</b><small>Completa los 16 retos (' + done + '/16) o llega a 950 XP (' + P.xp + '/950)</small></div></div>';
     const gob = $('#fu-go'); if (gob) gob.onclick = () => { go('orbitales'); tick(); };
   }
   // Celebración de nivel/logro: se ve ~2.6 s; si llega otra, se pone en cola.
@@ -108,7 +109,7 @@
   function go(name) {
     if (wide() && name === 'lab') { requestAnimationFrame(() => V.resize()); return; }
     $$('.tab').forEach(t => t.classList.toggle('on', t.id === 'tab-' + name)); $$('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.go === name));
-    if (name === 'retos') renderRetos(); if (name === 'orbitales') renderOrbitales(); if (name === 'lab') requestAnimationFrame(() => V.resize());
+    if (name === 'retos') renderRetos(); if (name === 'orbitales') renderOrbitales(); if (name === 'ajustes') { renderSug(); loadCommunity(false); } if (name === 'lab') requestAnimationFrame(() => V.resize());
   }
   $$('#tabbar button').forEach(b => b.onclick = () => { go(b.dataset.go); tick(); });
   function setSub(s) {
@@ -378,7 +379,7 @@
   }
   function sheetOpts() {
     const map = { 'o-h': 'showH', 'o-l': 'labels', 'o-s': 'spin', 'o-e': 'elastic' }, row = (id, t, s) => '<label class="sw-row"><span>' + t + '<small>' + s + '</small></span><input type="checkbox" id="' + id + '"' + (S.opts[map[id]] ? ' checked' : '') + (id === 'o-h' && S.manualH ? ' disabled' : '') + '></label>';
-    openSheet('<h3>Opciones</h3><div class="card list-s">' + row('o-e', 'Arrastre elástico', 'Al mover un átomo, los demás lo siguen.') + row('o-h', 'Mostrar hidrógenos', 'Se completan solos según la valencia.') + row('o-l', 'Etiquetas de elemento', 'Símbolo sobre cada átomo.') + row('o-s', 'Rotación automática', 'Gira despacio cuando no la tocas.') + '</div>' + (S.manualH ? '<p class="muted small" style="margin-top:8px">Hidrógeno manual activado (Ajustes): los H solo se añaden a mano, así que «Mostrar hidrógenos» no tiene efecto.</p>' : '') + '<div class="stack" style="margin-top:12px"><button class="sheet-btn" id="o-re">Reorganizar desde cero</button><button class="sheet-btn danger" id="o-clr">Limpiar lienzo</button></div>');
+    openSheet('<h3>Opciones</h3><div class="card list-s">' + row('o-e', 'Arrastre elástico', 'Al mover un átomo, los demás lo siguen.') + row('o-h', 'Mostrar hidrógenos', S.manualH ? 'Sin efecto: hidrógeno manual activado en Ajustes.' : 'Se completan solos según la valencia.') + row('o-l', 'Etiquetas de elemento', 'Símbolo sobre cada átomo.') + row('o-s', 'Rotación automática', 'Gira despacio cuando no la tocas.') + '</div>' + (S.manualH ? '<p class="muted small" style="margin-top:8px">Hidrógeno manual activado (Ajustes): los H solo se añaden a mano, así que «Mostrar hidrógenos» no tiene efecto.</p>' : '') + '<div class="stack" style="margin-top:12px"><button class="sheet-btn" id="o-re">Reorganizar desde cero</button><button class="sheet-btn danger" id="o-clr">Limpiar lienzo</button></div>');
     Object.keys(map).forEach(id => $('#' + id).onchange = e => { S.opts[map[id]] = e.target.checked; V.setOpts(S.opts); store.set('wex-opts', S.opts); tick(); });
     $('#o-re').onclick = () => { cb.snap(); V.reorganize(); closeSheet(); };
     $('#o-clr').onclick = () => { const prev = C.clone(V.getMol()); setMolecule({ atoms: [], bonds: [] }); S.undo = [prev]; btns(); closeSheet(); };
@@ -429,6 +430,14 @@
   $('#st-haptic').checked = S.haptic; $('#st-haptic').onchange = e => { S.haptic = e.target.checked; store.set('wex-haptic', S.haptic); };
   S.manualH = store.get('wex-manual-h', false); C.setAutoH(!S.manualH);
   $('#st-manual-h').checked = S.manualH; $('#st-manual-h').onchange = e => { setManualH(e.target.checked); tick(); };
+  // Navidad (assets/navidad.js): la preferencia guardada manda; por defecto,
+  // prendida solo en diciembre. El interruptor prende/apaga al instante.
+  const stNav = $('#st-navidad');
+  if (stNav) {
+    const navPref = store.get('wex-navidad', null), navOn = navPref === null ? (window.__xmas ? window.__xmas.isOn() : new Date().getMonth() === 11) : !!navPref;
+    stNav.checked = navOn;
+    stNav.onchange = e => { const on = e.target.checked; store.set('wex-navidad', on); if (window.__xmas) window.__xmas.set(on); tick(); toast(on ? 'Decoración navideña prendida 🎄' : 'Decoración navideña apagada'); };
+  }
   $('#prof-share').onclick = () => { shareAchievements(); tick(); };
   $('#prof-view').onclick = () => { viewShareCode(); tick(); };
   $('#prof-export').onclick = () => { exportAll(); tick(); };
@@ -487,7 +496,7 @@
     };
   }
   function exportAll() {
-    const data = { app: 'wex-molforge', v: 1, exported: new Date().toISOString(), profile: getProfile(), prog: P, hist: S.hist, mine: S.mine, opts: S.opts, manualH: S.manualH };
+    const data = { app: 'wex-molforge', v: 1, exported: new Date().toISOString(), profile: getProfile(), prog: P, hist: S.hist, mine: S.mine, opts: S.opts, manualH: S.manualH, sugerencias: S.sug };
     save('wex-molforge-respaldo.json', JSON.stringify(data, null, 1), 'application/json');
   }
   function importAll(file) {
@@ -495,7 +504,7 @@
     rd.onload = () => {
       let j; try { j = JSON.parse(rd.result); } catch (e) { return toast('Archivo no válido'); }
       if (j.app !== 'wex-molforge' || !j.prog) return toast('Ese archivo no es un respaldo de MolForge');
-      openSheet('<h3>Importar respaldo</h3><p class="muted small">Respaldo de <b>' + esc((j.profile && j.profile.name) || '?') + '</b> · ' + (j.prog.xp || 0) + ' XP · ' + (j.mine ? j.mine.length : 0) + ' moléculas guardadas.</p><div class="stack"><button class="sheet-btn" id="im-merge">Fusionar con lo que tengo</button><button class="sheet-btn" id="im-repl">Reemplazar todo lo mío</button><button class="sheet-btn" id="im-no">Cancelar</button></div>');
+      openSheet('<h3>Importar respaldo</h3><p class="muted small">Respaldo de <b>' + esc((j.profile && j.profile.name) || '?') + '</b> · ' + (j.prog.xp || 0) + ' XP · ' + (j.mine ? j.mine.length : 0) + ' moléculas guardadas · ' + (j.sugerencias ? j.sugerencias.length : 0) + ' sugerencias.</p><div class="stack"><button class="sheet-btn" id="im-merge">Fusionar con lo que tengo</button><button class="sheet-btn" id="im-repl">Reemplazar todo lo mío</button><button class="sheet-btn" id="im-no">Cancelar</button></div>');
       $('#im-no').onclick = closeSheet;
       const apply = merge => {
         if (merge) {
@@ -505,13 +514,14 @@
           Object.assign(P.f, j.prog.f || {}); Object.assign(P.themes, j.prog.themes || {}); Object.assign(P.fams, j.prog.fams || {});
           const haveM = new Set(S.mine.map(x => x.id)); (j.mine || []).forEach(x => { if (x.id && x.m && !haveM.has(x.id)) S.mine.push(x); });
           const haveH = new Set(S.hist.map(x => x.id)); (j.hist || []).forEach(x => { if (x.id && !haveH.has(x.id)) S.hist.push(x); });
+          const haveS = new Set(S.sug.map(x => x.id)); (j.sugerencias || []).forEach(x => { if (x.id && x.titulo && !haveS.has(x.id)) S.sug.push(x); });
           S.hist.sort((a, b) => b.ts - a.ts); S.hist = S.hist.slice(0, 80);
         } else {
           Object.assign(P, { xp: j.prog.xp || 0, done: j.prog.done || {}, c: j.prog.c || {}, f: j.prog.f || {}, disc: j.prog.disc || {}, opened: j.prog.opened || {}, themes: j.prog.themes || {}, fams: j.prog.fams || {} });
-          S.mine = j.mine || []; S.hist = j.hist || [];
+          S.mine = j.mine || []; S.hist = j.hist || []; S.sug = Array.isArray(j.sugerencias) ? j.sugerencias : [];
           if (j.profile) store.set('wex-profile', j.profile);
         }
-        repairXP(); saveP(); saveMine(); store.set('wex-hist', S.hist);
+        repairXP(); saveP(); saveMine(); store.set('wex-hist', S.hist); saveSug(); renderSug();
         if (j.manualH !== undefined) setManualH(!!j.manualH);
         closeSheet(); buildChips(); renderList(true); renderRetos(); renderProfile(); toast(merge ? 'Respaldo fusionado' : 'Respaldo importado');
       };
@@ -531,6 +541,86 @@
     info(); toast(on ? 'Hidrógeno manual: añade los H a mano' : 'Hidrógeno automático: se completan solos');
   }
 
+  // ---------- buzón de sugerencias (Ajustes) ----------
+  // Sin servidor: las sugerencias viven en este dispositivo (localStorage,
+  // clave wex-sugerencias) y viajan con la exportación/importación de datos.
+  // Los votos y comentarios locales NO se comparten con nadie: un voto por
+  // dispositivo, se puede quitar tocando la estrella de nuevo. Los votos y
+  // comentarios de verdad se hacen en GitHub (Issues del repo, solo lectura
+  // aquí, vía API pública sin token).
+  const SUG_REPO = 'https://github.com/WexYt/Molforge-pro';
+  const saveSug = () => store.set('wex-sugerencias', S.sug);
+  const sugById = id => S.sug.find(x => x.id === id);
+  function sugText(s) { return '💡 Sugerencia para MolForge Pro: ' + s.titulo + '\n\n' + s.texto + '\n— ' + s.autor; }
+  function sugIssueUrl(s) { return SUG_REPO + '/issues/new?title=' + encodeURIComponent('[Sugerencia] ' + s.titulo) + '&body=' + encodeURIComponent(s.texto + '\n\nPropuesta desde MolForge Pro v0.8.1 · por ' + s.autor); }
+  function renderSug() {
+    const box = $('#sug-local-list'); if (!box) return;
+    if (!S.sug.length) { box.innerHTML = '<p class="sug-empty">Aún no hay sugerencias en este dispositivo.<br>¡Escribe la primera idea arriba! Si la publicas en GitHub, la verá toda la comunidad.</p>'; return; }
+    box.innerHTML = S.sug.map(s => '<article class="sug-item" data-id="' + esc(s.id) + '"><b>' + esc(s.titulo) + '</b><p>' + esc(s.texto) + '</p><div class="meta">' + esc(s.autor) + ' · ' + fmtDate(s.fecha) + ' ' + fmtTime(s.fecha) + '</div><div class="sug-actions"><button data-act="star" aria-pressed="' + !!s.votado + '" aria-label="Votar con una estrella">⭐ ' + (s.votos || 0) + '</button><button data-act="share">Compartir</button><button data-act="gh">Publicar en GitHub</button></div>' +
+      '<div class="sug-comments">' + (s.comentarios || []).map(c => '<div class="c">' + esc(c.texto) + '<small>' + esc(c.autor) + ' · ' + fmtDate(c.fecha) + ' ' + fmtTime(c.fecha) + '</small></div>').join('') + '</div>' +
+      '<div class="sug-cform"><input maxlength="300" placeholder="Escribe un comentario para apoyar esta idea…" aria-label="Escribir un comentario"><button data-act="comment">Comentar</button></div></article>').join('');
+  }
+  async function shareSug(s) {
+    const text = sugText(s);
+    try {
+      if (navigator.share) { await navigator.share({ title: 'Sugerencia para MolForge Pro', text }); return; }
+      throw 0;
+    } catch (e) { /* sin Web Share: copiar al portapapeles */ }
+    try { await navigator.clipboard.writeText(text); toast('Sugerencia copiada al portapapeles'); }
+    catch (e2) { openSheet('<h3>Compartir sugerencia</h3><textarea class="sheet-in" readonly rows="6">' + esc(text) + '</textarea><p class="muted small">Copia el texto de arriba para compartirlo donde quieras.</p>'); }
+  }
+  function renderCommunity(items) {
+    const list = $('#sug-comm-list'); if (!list) return;
+    if (!items.length) { list.innerHTML = '<p class="sug-empty">No hay Issues abiertos en GitHub por ahora.</p>'; return; }
+    list.innerHTML = items.map(x => '<article class="sug-item comm"><b><a href="' + esc(x.html_url) + '" target="_blank" rel="noopener">' + esc(x.title) + '</a></b><div class="meta">' + esc(x.user ? x.user.login : '?') + ' · 👍 ' + (x.reactions ? x.reactions.total_count : 0) + ' reacciones · 💬 ' + (x.comments || 0) + ' comentarios</div></article>').join('');
+  }
+  async function loadCommunity(force) {
+    const note = $('#sug-comm-note'), list = $('#sug-comm-list');
+    if (!note || !list) return;
+    const now = Date.now();
+    if (!force && S.comm.items && now - S.comm.ts < 5 * 60 * 1000) { renderCommunity(S.comm.items); note.textContent = 'Sugerencias abiertas en GitHub (solo lectura). Para votar o comentar, abre el Issue en GitHub.'; return; }
+    if (!online()) { note.textContent = 'Sin conexión: ves solo tus sugerencias guardadas en este dispositivo. Las de la comunidad necesitan internet.'; list.innerHTML = ''; return; }
+    note.textContent = 'Cargando sugerencias de la comunidad…';
+    try {
+      const r = await fetch('https://api.github.com/repos/WexYt/Molforge-pro/issues?state=open&per_page=20');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json(), items = (Array.isArray(j) ? j : []).filter(x => !x.pull_request);
+      S.comm = { ts: now, items };
+      renderCommunity(items);
+      note.textContent = items.length ? 'Sugerencias abiertas en GitHub (solo lectura). Para votar o comentar, abre el Issue en GitHub.' : 'No hay Issues abiertos en GitHub por ahora.';
+    } catch (e) {
+      note.textContent = 'Sin conexión: ves solo tus sugerencias guardadas en este dispositivo. Las de la comunidad necesitan internet.';
+      list.innerHTML = '';
+    }
+  }
+  (function initSug() {
+    const form = $('#sug-form'); if (!form) return;
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const t = ($('#sug-title').value || '').trim(), x = ($('#sug-text').value || '').trim();
+      if (!t || !x) return toast('Escribe un título y tu idea');
+      S.sug.unshift({ id: uid(), titulo: t.slice(0, 80), texto: x.slice(0, 500), fecha: Date.now(), autor: getProfile().name || 'Anónimo', votos: 0, votado: false, comentarios: [] });
+      saveSug(); renderSug(); form.reset(); toast('Sugerencia guardada en este dispositivo');
+    });
+    $('#sug-local-list').addEventListener('click', e => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const item = btn.closest('.sug-item'), s = item && sugById(item.dataset.id); if (!s) return;
+      const act = btn.dataset.act;
+      if (act === 'star') { s.votado = !s.votado; s.votos = Math.max(0, (s.votos || 0) + (s.votado ? 1 : -1)); saveSug(); renderSug(); tick(); }
+      else if (act === 'share') shareSug(s);
+      else if (act === 'gh') window.open(sugIssueUrl(s), '_blank', 'noopener');
+      else if (act === 'comment') {
+        const inp = item.querySelector('.sug-cform input'), txt = (inp.value || '').trim();
+        if (!txt) return toast('Escribe un comentario primero');
+        (s.comentarios = s.comentarios || []).push({ texto: txt.slice(0, 300), fecha: Date.now(), autor: getProfile().name || 'Anónimo' });
+        saveSug(); renderSug(); toast('Comentario añadido');
+      }
+    });
+    $('#sug-comm-open').onclick = () => window.open(SUG_REPO + '/issues', '_blank', 'noopener');
+    $('#sug-comm-refresh').onclick = () => { loadCommunity(true); tick(); };
+    renderSug();
+  })();
+
   // ---------- arranque ----------
   (async function init() {
     applyTheme(document.documentElement.dataset.theme || 'oscuro'); splash(18, 'Cargando biblioteca…');
@@ -543,5 +633,5 @@
     drawFams(); drawPalette(); saveMine(); V.setMol({ atoms: [], bonds: [] }); info(); selectTool('move'); seen.clear(); fixWide(); splash(100, 'Listo');
     setTimeout(() => { const s = $('#splash'); s.classList.add('out'); setTimeout(() => { s.remove(); GL.sync(); }, 600); }, Math.max(0, 900 - (performance.now() - t0)));
   })();
-  window.__wex = { S, P, V, openEntry, setMolecule, info, evaluate, GL, level, lvName, repairXP, finalUnlocked, getProfile, renderProfile, setManualH, renderOrbitales, showCelebration, MIS };
+  window.__wex = { S, P, V, openEntry, setMolecule, info, evaluate, GL, level, lvName, repairXP, finalUnlocked, getProfile, renderProfile, setManualH, renderOrbitales, showCelebration, MIS, renderSug, loadCommunity };
 })();

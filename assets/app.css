@@ -33,8 +33,11 @@ html[data-theme=cristal] .card,html[data-theme=cristal] .hero,html[data-theme=cr
 .tab{position:absolute;inset:0;display:none;overflow-y:auto;overflow-x:hidden;padding:calc(var(--st) + 14px) 16px 28px;-webkit-overflow-scrolling:touch}
 .tab.on{display:block;animation:tabin .28s var(--ease)}#tab-lab.on{display:flex;flex-direction:column;padding:calc(var(--st) + 8px) 0 0;overflow:hidden}
 @keyframes tabin{from{opacity:0;transform:translateY(8px)}}
-#tabbar{position:fixed;left:0;right:0;bottom:0;height:calc(var(--tab) + var(--sb));padding:6px 10px var(--sb);display:flex;gap:6px;border-width:1px 0 0;z-index:30}
-#tabbar button{flex:1;display:grid;place-items:center;align-content:center;gap:2px;font-size:.7rem;color:var(--muted);border-radius:14px}
+#tabbar{position:fixed;left:0;right:0;bottom:0;height:calc(var(--tab) + var(--sb));padding:6px 6px var(--sb);display:flex;gap:4px;border-width:1px 0 0;z-index:30}
+#tabbar button{flex:1 1 0;min-width:0;display:grid;place-items:center;justify-content:center;align-content:center;gap:2px;font-size:.64rem;color:var(--muted);border-radius:14px}
+#tabbar button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#tabbar .ic{width:20px;height:20px}
+@media (max-width:400px){#tabbar{padding:6px 4px var(--sb);gap:2px}#tabbar button{font-size:.6rem}#tabbar .ic{width:18px;height:18px}}
 #tabbar button.on{color:var(--primary)}#tabbar button.on .ic{transform:translateY(-1px) scale(1.08)}
 .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}.top h1{font-size:1.7rem}.top p{margin:2px 0 0;font-size:.85rem}
 /* biblioteca */
@@ -80,6 +83,10 @@ html[data-theme=cristal] .card,html[data-theme=cristal] .hero,html[data-theme=cr
 .sw-claro{background:linear-gradient(135deg,#eef3f8,#cfe0ee);color:#0f1c2e}.sw-oscuro{background:linear-gradient(135deg,#0a111f,#1b2d4d)}.sw-cristal{background:linear-gradient(135deg,#7a4dff,#26c6c0 60%,#ff5fa2)}
 .card{border-radius:var(--r);padding:14px}.list-s{padding:2px 14px}.sw-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0}.sw-row+.sw-row{border-top:1px solid var(--border)}.sw-row small{display:block;color:var(--muted);font-size:.78rem}
 input[type=checkbox]{appearance:none;width:46px;height:28px;border-radius:99px;background:var(--border);position:relative;transition:background .2s;flex:none}input[type=checkbox]::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s var(--ease)}input[type=checkbox]:checked{background:var(--primary)}input[type=checkbox]:checked::after{transform:translateX(18px)}
+/* Un interruptor deshabilitado (p. ej. «Mostrar hidrógenos» con H manual) debe
+   verse apagado aunque su valor guardado sea «on»: sin esto se ve igual que uno vivo. */
+input[type=checkbox]:disabled{opacity:.4;cursor:not-allowed}
+input[type=checkbox]:disabled:checked{background:var(--muted)}
 .btn{margin-top:10px;padding:11px 16px;border-radius:12px;background:var(--primary);color:var(--on);font-weight:700}
 .card p{margin:0 0 6px}
 /* hojas inferiores */
@@ -100,9 +107,17 @@ html[data-theme=cristal] #sheet{background:rgba(40,28,92,.78);-webkit-backdrop-f
 #celebrate .cel-emblem svg{width:100%;height:100%;display:block}
 #celebrate b{font-size:1.35rem}
 #celebrate span{font-size:.92rem;color:#c7d3e6}
-.final{display:flex;align-items:center;gap:12px}.final .lv-emblem{width:48px;height:48px}.final>div{flex:1;min-width:0}.final b{display:block}.final small{color:var(--muted)}
+/* Logro final: la tarjeta nunca es ancha (la columna de Retos mide ≤ ~420 px en
+   todos los tamaños), así que el botón va siempre a ancho completo debajo del
+   texto; en fila el texto quedaba con ~100 px y se cortaba a media palabra. */
+.final{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.final-top{display:flex;align-items:center;gap:12px;min-width:0}
+.final-top>div:last-child{flex:1;min-width:0}
+.final .lv-emblem{width:48px;height:48px}
+.final b{display:block}.final small{color:var(--muted)}
+.final .sheet-btn{justify-content:center}
 .prof{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.prof b{font-size:1.05rem}.prof span{font-size:.85rem}
-.orb-sel{display:flex;align-items:center;gap:10px}.orb-sel span{font-weight:700}.orb-sel select{flex:1;padding:9px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);font:inherit}
+.orb-sel{display:flex;align-items:center;gap:10px;min-width:0}.orb-sel span{font-weight:700;flex:none}.orb-sel select{flex:1 1 0;min-width:0;max-width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);font:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .orb-modes{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.orb-modes button{padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--fg);font:inherit;font-size:.88rem}
 .orb-modes button.on{border-color:var(--primary);background:var(--primary);color:var(--on)}
 .orb-cv-wrap{padding:8px;overflow:hidden}.orb-cv-wrap canvas{width:100%;height:340px;display:block;border-radius:12px;background:#0a1120;touch-action:none}
@@ -114,7 +129,7 @@ html[data-theme=cristal] #sheet{background:rgba(40,28,92,.78);-webkit-backdrop-f
 
 /* ===== v0.6 · segmentos, historial, dispositivo, retos, tabla periódica, reglas ===== */
 .seg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--bg2);border:1px solid var(--border);margin:0 0 12px}
-.seg button{flex:1;padding:8px 6px;border-radius:10px;font-size:.84rem;color:var(--muted);white-space:nowrap}.seg button b{font-weight:700;color:var(--primary)}
+.seg button{flex:1;min-width:0;padding:8px 6px;border-radius:10px;font-size:.84rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.seg button b{font-weight:700;color:var(--primary)}
 .seg button[aria-selected=true]{background:var(--primary);color:var(--on);font-weight:700}.seg button[aria-selected=true] b{color:var(--on)}
 .row-btns{display:flex;gap:8px;margin-bottom:10px}.btn.ghost{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;margin:0;background:var(--card);color:var(--fg);border:1px solid var(--border);font-weight:600}
 .day{margin:14px 4px 4px;font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
@@ -135,7 +150,7 @@ html[data-theme=cristal] #sheet{background:rgba(40,28,92,.78);-webkit-backdrop-f
 .mis .st{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid var(--border);flex:none;font-size:.72rem;font-weight:700;color:var(--muted)}.mis.done .st{background:var(--primary);border-color:var(--primary);color:var(--on)}
 .mis b{display:block}.mis small{display:block;color:var(--muted);font-size:.8rem}.mis .rw{color:var(--accent);font-size:.76rem;margin-top:3px}.mis.done .rw{color:var(--primary)}
 .mis.pop{animation:celebrate 2s var(--ease)}@keyframes celebrate{0%{transform:scale(.96)}40%{transform:scale(1.03);box-shadow:0 0 0 6px color-mix(in oklab,var(--primary) 35%,transparent)}100%{transform:none}}
-.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .utile{display:grid;place-items:center;gap:4px;padding:12px 6px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-align:center;font-size:.8rem;min-height:92px}.utile .ic{width:26px;height:26px;color:var(--muted)}.utile.on{border-color:var(--primary)}.utile.on .ic{color:var(--primary)}.utile small{color:var(--muted);font-size:.7rem}
 /* reglas y datos */
 .rules{display:grid;gap:6px;margin-top:10px}.rules details{border-radius:12px;background:var(--card);border:1px solid var(--border);padding:0 12px}
@@ -180,5 +195,35 @@ html[data-theme=cristal] #sheet.lg{background:linear-gradient(135deg,rgba(64,46,
 @media (min-width:1500px){#app{grid-template-columns:440px minmax(0,1fr) 400px}}
 
 .item{content-visibility:auto;contain-intrinsic-size:auto 62px}
+/* ===== NAVIDAD — quitar en enero ===== */
+.xmas-tree{display:none;font-size:1.35rem;line-height:1;align-self:flex-start;margin-top:4px}
+html.xmas .xmas-tree{display:inline}
+#xmas-snow{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:hidden}
+#xmas-snow i{position:absolute;top:-12px;border-radius:50%;background:#fff;animation:xmas-fall linear infinite}
+@keyframes xmas-fall{to{transform:translateY(105vh) translateX(4vw)}}
+@media (prefers-reduced-motion:reduce){#xmas-snow{display:none}}
+/* ===== /NAVIDAD ===== */
+
+/* ===== buzón de sugerencias ===== */
+.sug-form{margin-top:10px}
+.sug-form .sheet-in{margin:0 0 8px}
+.sug-list{display:grid;gap:10px;margin-top:12px}
+.sug-item{padding:12px;border-radius:14px;background:var(--card2);border:1px solid var(--border)}
+.sug-item>b{display:block;font-size:.98rem}
+.sug-item>p{margin:6px 0;font-size:.88rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.sug-item .meta{font-size:.76rem;color:var(--muted)}
+.sug-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sug-actions button{padding:7px 11px;border-radius:99px;border:1px solid var(--border);background:var(--card);font-size:.82rem;font-weight:600}
+.sug-star[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+.sug-comments{display:grid;gap:6px;margin-top:10px}
+.sug-comments .c{padding:8px 10px;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:.85rem}
+.sug-comments .c small{display:block;color:var(--muted);font-size:.72rem;margin-top:2px}
+.sug-cform{display:flex;gap:6px;margin-top:10px}
+.sug-cform input{flex:1;min-width:0;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);font:inherit;font-size:.88rem}
+.sug-cform button{padding:9px 13px;border-radius:10px;background:var(--primary);color:var(--on);font-weight:700;font-size:.85rem}
+.sug-item.comm a{color:var(--fg);text-decoration:none}
+.sug-item.comm a:hover{text-decoration:underline}
+.sug-empty{padding:14px 6px;text-align:center;color:var(--muted);font-size:.88rem}
+
 /* la fila de familias no debe ensanchar el panel de herramientas */
 .dock{grid-template-columns:minmax(0,1fr)}.fams,.fams .chips,.palette,.labtop,.stage{min-width:0}
