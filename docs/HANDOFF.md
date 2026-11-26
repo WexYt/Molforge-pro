@@ -19,10 +19,18 @@ Para cualquier persona o modelo de IA que continúe el trabajo **sin alterar las
 12. **Modo escritorio/tableta** con las mismas funciones y más amplio, cuidando la estética.
 13. Usar los activos de **liquid glass** que aportó el propietario (`assets/liquid-glass.js`, `docs/liquid-glass-SKILL.md`): solo en el tema Cristal, sin elementos de más de ~800 px por lado, y sin hacer que la refracción comunique información.
 
-## Estado actual (v0.6 beta)
-- App en JS puro: `assets/chem.js` (modelo, fórmula, huella canónica, geometría, hidrógenos derivados, SDF/MOL/XYZ/SMILES), `assets/view.js` (canvas, gestos), `assets/app.js` + `app.css` + `index.html`.
-- Biblioteca: `data/moleculas.txt` → `tools/build_biblioteca.py` → `assets/biblioteca.json` (CI valida y regenera).
-- Probado con Chromium sin interfaz (Playwright): búsqueda, apertura, creación, arrastre, enlaces, deshacer, descarga SDF, temas, uso sin conexión, geometría de las 226 moléculas.
+## Órdenes añadidas en la v0.8 (no cambiar)
+14. **logP**: calcular el logP estimado (Moriguchi) y mostrarlo en Datos; usarlo en las reglas de fármaco (Lipinski, Egan, Muegge, Ghose) y añadir la 8.ª regla, Pfizer 3/75. Dejar claro que es una estimación.
+15. **Hidrógeno manual**: un ajuste en Ajustes para que los H no se completen solos y se añadan a mano; la fórmula, la masa y el reconocimiento deben respetar el modo.
+16. **Perfil en Ajustes**: usuario único (nombre + código generado en el dispositivo, sin servidor), compartir logros con un código y pasar **todos** los datos a otro dispositivo (exportar/importar, fusionando o reemplazando).
+17. **Logos de niveles** con animaciones que se vean (~2 s) y celebración al subir de nivel.
+18. **Retos y XP**: que completar los 16 retos dé exactamente el nivel máximo (950 XP = nivel 7, no hay nivel 8) y que las partidas guardadas se reparen si el XP quedó por debajo de lo que corresponde.
+19. **Logro final**: al completar los 16 retos, desbloquear la vista 3D de las capas de electrones y los orbitales s, p, d y f con todas sus variantes.
+
+## Estado actual (v0.8 beta)
+- App en JS puro: `assets/chem.js` (modelo, fórmula, huella canónica, geometría, hidrógenos, logP Moriguchi, SDF/MOL/XYZ/SMILES), `assets/view.js` (canvas, gestos), `assets/orbitals.js` (capas de electrones y orbitales s/p/d/f), `assets/app.js` + `app.css` + `index.html`.
+- Biblioteca: `data/moleculas.txt` → `tools/build_biblioteca.py` → `assets/biblioteca.json` (CI valida y regenera). 242 moléculas (226 + 16 desbloqueables).
+- Probado con Chromium sin interfaz (Playwright): búsqueda, apertura, creación, arrastre, enlaces, deshacer, descarga SDF, temas, uso sin conexión, geometría de las 226 moléculas, logP contra valores experimentales (MAE 0.54 en 26 compuestos), modo hidrógeno manual, perfil exporta/importa, 16 retos = 950 XP = nivel 7 = orbitales desbloqueados.
 
 ## Decisiones de diseño
 - Hidrógenos implícitos (valencia); solo los átomos pesados se editan. Reconocimiento: huella Weisfeiler-Lehman + PubChem (SMILES → CID → título) si hay internet.
@@ -30,7 +38,7 @@ Para cualquier persona o modelo de IA que continúe el trabajo **sin alterar las
 - Pocas animaciones, con propósito (entrada de lista, aparición de átomos, cambio de tema circular); respetan «reducir movimiento».
 
 ## Pendientes conocidos
-logP y reglas basadas en logP · probar en iPhone/Safari reales · verificar CID de PubChem escritos de memoria · ChEMBL · estereoquímica · probar el vidrio líquido en Safari/Firefox (usa respaldo esmerilado).
+Probar en iPhone/Safari reales · verificar CID de PubChem escritos de memoria · ChEMBL · estereoquímica · probar el vidrio líquido en Safari/Firefox (usa respaldo esmerilado).
 
 ## Pendientes anteriores
 ChEMBL · estereoquímica · importar MOL/SDF del dispositivo · verificar CID de PubChem escritos de memoria · pruebas en iPhone/Safari reales · compartir la vista como imagen con marca.

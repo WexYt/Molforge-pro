@@ -1,0 +1,196 @@
+WEX MolForge Pro · v0.8 beta
+Laboratorio molecular 3D para tu bolsillo
+WEX Labs · Código abierto · Licencia MIT
+26 de noviembre de 2026
+
+============================================================
+¿QUÉ ES?
+============================================================
+Un laboratorio molecular que cabe en el celular.
+
+1. Construye y mira en 3D
+   Coloca átomos, une enlaces simples, dobles o triples y
+   arrástralos para darles forma. La app reconoce sola el
+   nombre y los elementos de lo que construiste.
+
+2. Código abierto
+   Licencia MIT: cualquiera puede leerlo, usarlo, mejorarlo
+   y compartirlo. Se colabora por GitHub con Pull Requests.
+
+3. Funciona sin internet
+   Se instala como app y guarda la biblioteca en el
+   dispositivo. Todo lo que ves aquí funciona sin conexión.
+
+============================================================
+¿PARA QUÉ SIRVE?
+============================================================
+Para aprender, crear, explorar y compartir.
+
+Aprender
+  Ver la forma real de las moléculas, la tabla periódica
+  completa (118 elementos) y los orbitales s, p, d y f.
+
+Crear
+  Construir una molécula desde cero: la app detecta sola
+  su nombre y los elementos que la forman.
+
+Explorar
+  242 compuestos con buscador y acceso a PubChem; el
+  historial marca lo buscado y lo creado, con fecha y hora.
+
+Compartir
+  Descargar SDF, MOL, XYZ, JSON o PNG y compartir logros
+  con otras personas con un código.
+
+============================================================
+¿CÓMO SE USA?
+============================================================
+Cuatro pasos.
+
+1. Busca o crea
+   Elige un compuesto de la biblioteca o toca
+   «Crear desde cero».
+
+2. Arrastra y une
+   Un dedo gira, dos dedos acercan. Arrastra un átomo para
+   darle forma; une enlaces simples, dobles o triples.
+
+3. Mira lo que detecta
+   Arriba aparecen el nombre y los elementos. En «Datos»
+   ves fórmula, masa, logP y reglas de fármaco.
+
+4. Guarda y comparte
+   Guarda en tu dispositivo, descarga el archivo o comparte
+   tus logros con un código.
+
+============================================================
+LO NUEVO EN LA VERSIÓN 0.8 BETA
+============================================================
+- logP estimado (método de Moriguchi): se ve en Datos junto
+  a la fórmula y la masa, y se usa en las reglas de fármaco.
+  Es una estimación, no un valor medido: en 26 compuestos
+  conocidos el error típico es de unas 0,5 unidades.
+- 8 reglas de fármaco con logP: Lipinski, Veber, Egan,
+  Muegge, Oprea, regla de 3, Ghose y la nueva Pfizer 3/75.
+- Hidrógeno manual: un ajuste en Ajustes para que los H no
+  se completen solos y se añadan a mano. La fórmula, la
+  masa y el reconocimiento respetan el modo que elijas.
+- Mi perfil: nombre y código único generados en tu
+  dispositivo, sin servidor. Comparte tus logros con un
+  código y pasa todos tus datos a otro dispositivo
+  (exportar/importar, fusionando o reemplazando).
+- Emblemas de nivel: cada nivel tiene su logo (matraz,
+  brújula, estrella, anillo, átomo, molécula, corona) con
+  animación que se ve, y una celebración grande al subir
+  de nivel.
+- El logro final ya funciona: al completar los 16 retos
+  se desbloquean las capas de electrones y los orbitales 3D.
+
+============================================================
+LO QUE INCLUYE HOY (v0.8 beta)
+============================================================
+  118  elementos de la tabla periódica
+  242  compuestos (226 + 16 por desbloquear)
+    8  reglas de fármaco con logP
+    3  temas: Claro, Oscuro y Cristal líquido
+    0  conexión necesaria para usarla
+
+Más: historial con fecha y origen, biblioteca del
+dispositivo, retos y niveles, perfil para compartir logros
+y paso de datos entre dispositivos, modo tableta y
+escritorio con las mismas funciones.
+
+============================================================
+RETOS Y DESBLOQUEOS
+============================================================
+El logro final: capas y orbitales en 3D.
+
+Al completar los 16 retos (950 XP, nivel 7) se desbloquea
+una vista nueva:
+  - Capas de electrones animadas para los 118 elementos
+  - Orbitales s, p, d y f con todas sus variantes
+    (1 forma s, 3 formas p, 5 formas d, 7 formas f)
+  - Configuración electrónica y electrones de valencia
+
+Los niveles son 7: Aprendiz, Explorador, Alquimista,
+Químico, Maestro, Arquitecto molecular y Leyenda.
+Se sube con 0, 100, 250, 420, 620, 800 y 950 XP: el
+nivel 7 es exactamente 950 XP, la suma de los 16 retos.
+Si una partida guardada tenía retos hechos pero el XP
+quedó por debajo, la app lo repara sola al abrirla.
+
+Las formas de los orbitales son los armónicos esféricos
+reales (la parte angular), y los electrones se colocan
+según el principio de Aufbau, con las excepciones reales
+(cromo, cobre y compañía).
+
+============================================================
+TAMBIÉN EN TABLETA Y ESCRITORIO
+============================================================
+Mismas funciones, más espacio: barra lateral, biblioteca,
+laboratorio y panel de datos y reglas en vivo.
+
+============================================================
+¿QUÉ PROGRAMACIÓN TIENE?
+============================================================
+  JavaScript puro   sin compilar ni dependencias
+  Canvas 2D         visor 3D propio con gestos táctiles
+  HTML + CSS        responsivo: celular, tableta y escritorio
+  Python            genera la biblioteca y la tabla periódica
+  Service Worker    funciona sin conexión y se instala (PWA)
+  GitHub Pages      publicación gratuita
+  GitHub Actions    valida y regenera la biblioteca
+
+Archivos principales:
+  chem.js       motor químico (fórmula, logP, reglas, SMILES)
+  view.js       visor 3D táctil
+  orbitals.js   capas de electrones y orbitales s/p/d/f
+  app.js        interfaz, retos, perfil y orbitales
+Unas 1 900 líneas de código en total · licencia MIT.
+
+============================================================
+ALCANCE: HASTA DÓNDE PUEDE LLEGAR
+============================================================
+Hoy
+  Educación y divulgación de la química. Usable en
+  cualquier celular, sin internet. Colaboración abierta
+  por GitHub.
+
+Siguiente
+  Integrar ChEMBL. Estereoquímica y un logP más preciso.
+  Más compuestos aportados por la comunidad.
+
+Visión
+  Una plataforma abierta de laboratorios científicos.
+  Cada área, un laboratorio que cualquiera pueda aportar.
+  Aprender haciendo, en el bolsillo.
+
+Límites actuales: el logP es una estimación y todavía
+no hay estereoquímica.
+
+============================================================
+UN DIÁLOGO
+============================================================
+«No quiero que sea una sola aplicación de química»
+
+Visitante:  Entonces… ¿es una aplicación de química?
+WEX:        Empezó así, pero no quiero que se quede ahí.
+Visitante:  ¿Qué quieres que sea?
+WEX:        Un lugar donde cualquiera pueda ver, construir
+            y entender la ciencia con las manos, desde el
+            celular.
+Visitante:  ¿Y la química?
+WEX:        Es el primer laboratorio: moléculas, orbitales
+            y tabla periódica son solo la primera sala.
+Visitante:  ¿Y qué sigue?
+WEX:        Más laboratorios abiertos, hechos con la
+            comunidad. Por eso el código es abierto.
+
+============================================================
+PRUÉBALA Y COLABORA
+============================================================
+  wexyt.github.io/Molforge-pro
+  github.com/WexYt/Molforge-pro
+  Licencia MIT · Datos: PubChem (NIH, dominio público)
+
+Agrega una molécula, un reto o una idea: abre un Pull Request.
