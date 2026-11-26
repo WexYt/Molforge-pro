@@ -1,4 +1,4 @@
-/* WEX MolForge Pro v0.8.1 beta · app.js — interfaz móvil, tableta y escritorio (MIT) */
+/* WEX MolForge Pro v0.8.2 beta · app.js — interfaz móvil, tableta y escritorio (MIT) */
 (function () {
   const C = Chem, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], EL = C.EL;
   const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -8,7 +8,9 @@
   const S = { lib: [], cats: [], byCanon: new Map(), cat: 'Todas', q: '', list: [], shown: 0, sub: 'lib', fam: 'frec', undo: [], redo: [], tool: 'move', cur: { name: '', formula: '' }, sess: { id: uid(), kind: 'crea' },
     pc: store.get('wex-pc', true), haptic: store.get('wex-haptic', true), opts: Object.assign({ showH: true, labels: false, spin: false, elastic: true }, store.get('wex-opts', {})),
     hist: store.get('wex-hist', []), mine: store.get('wex-mine', []),
-    sug: store.get('wex-sugerencias', []), comm: { ts: 0, items: null } };
+    sug: store.get('wex-sugerencias', []), comm: { ts: 0, items: null },
+    // Fondo del PNG al descargar (punto 2 v0.8.2): color CSS o 'transparent'.
+    pngBg: store.get('wex-pngbg', '#0d1526') };
   const P = Object.assign({ xp: 0, done: {}, c: {}, f: {}, disc: {}, opened: {}, themes: {}, fams: {} }, store.get('wex-prog', {}));
   const saveP = () => store.set('wex-prog', P), wide = () => matchMedia('(min-width:720px)').matches, desk = () => matchMedia('(min-width:1000px)').matches;
 
@@ -141,7 +143,8 @@
       if (mode === 'shells') { $('#orb-vars').innerHTML = '<span class="muted small">Arrastra para girar · pellizca o usa la rueda para acercar.</span>'; S.orbView.setMode('shells'); }
       else {
         const vs = Orb.FN[mode];
-        $('#orb-vars').innerHTML = '<button data-v="all" class="' + (S.orbVar === 'all' ? 'on' : '') + '">Todos</button>' + vs.map((v, i) => '<button data-v="' + i + '" class="' + (String(S.orbVar) === String(i) ? 'on' : '') + '">' + v[0] + '</button>').join('');
+        if (vs.length === 1) S.orbVar = 0; // 's' solo tiene una variante: 'Todos' sería el mismo botón
+        $('#orb-vars').innerHTML = (vs.length > 1 ? '<button data-v="all" class="' + (S.orbVar === 'all' ? 'on' : '') + '">Todos</button>' : '') + vs.map((v, i) => '<button data-v="' + i + '" class="' + (String(S.orbVar) === String(i) ? 'on' : '') + '">' + v[0] + '</button>').join('');
         $$('#orb-vars button').forEach(b => b.onclick = () => { S.orbVar = b.dataset.v === 'all' ? 'all' : +b.dataset.v; draw(); tick(); });
         S.orbView.setMode(mode, S.orbVar === undefined ? 'all' : S.orbVar);
       }
@@ -367,12 +370,23 @@
   function sheetDown() {
     const m = V.getMol(); if (!m.atoms.length) return openSheet('<h3>Descargar</h3><p class="muted">Crea o abre una molécula primero.</p>');
     const can = navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.sdf', { type: 'chemical/x-mdl-sdfile' })] });
-    openSheet('<h3>Descargar</h3><div class="dl"><button data-f="sdf">SDF<small>Estándar de química (3D)</small></button><button data-f="mol">MOL<small>Molfile V2000</small></button><button data-f="xyz">XYZ<small>Coordenadas en texto</small></button><button data-f="json">JSON<small>Átomos, enlaces y datos</small></button><button data-f="png">PNG<small>Imagen de la vista</small></button>' + (can ? '<button data-f="share">Compartir…<small>Enviar por apps</small></button>' : '') + '</div>');
+    // Fondo del PNG: paleta lista (oscuro, claro, vivos, transparente) +
+    // color propio + vista previa pequeña (se genera con el visor real).
+    const PRESETS = [['transparent', 'Transparente'], ['#0d1526', 'Oscuro'], ['#ffffff', 'Blanco'], ['#000000', 'Negro'], ['#1e3a8a', 'Azul'], ['#14532d', 'Verde'], ['#7f1d1d', 'Rojo'], ['#be185d', 'Rosa'], ['#4c1d95', 'Morado'], ['#92400e', 'Dorado']];
+    const bgBtn = ([c, n]) => '<button data-bg="' + c + '" class="bg-sw' + (S.pngBg === c ? ' on' : '') + '" style="background:' + (c === 'transparent' ? 'conic-gradient(#cbd5e1 25%,#fff 0 50%,#cbd5e1 0 75%,#fff 0);background-size:12px 12px' : c) + '" title="' + n + '" aria-label="Fondo ' + n + '"></button>';
+    openSheet('<h3>Descargar</h3><div class="dl"><button data-f="sdf">SDF<small>Estándar de química (3D)</small></button><button data-f="mol">MOL<small>Molfile V2000</small></button><button data-f="xyz">XYZ<small>Coordenadas en texto</small></button><button data-f="json">JSON<small>Átomos, enlaces y datos</small></button><button data-f="png">PNG<small>Imagen de la vista</small></button>' + (can ? '<button data-f="share">Compartir…<small>Enviar por apps</small></button>' : '') + '</div>' +
+      '<h3 style="margin-top:16px;font-size:1rem">Fondo de la imagen (PNG)</h3><p class="muted small">Elige el fondo con el que se guarda el PNG. «Transparente» guarda la molécula sin fondo.</p><div class="bgpick" id="bgpick">' + PRESETS.map(bgBtn).join('') + '</div><label class="bg-custom">Color propio <input type="color" id="bg-custom" value="' + (S.pngBg === 'transparent' || !/^#[0-9a-fA-F]{6}$/.test(S.pngBg) ? '#0d1526' : S.pngBg) + '" aria-label="Elegir color de fondo propio"></label><div class="bgprev"><img id="bg-prev" alt="Vista previa del PNG con el fondo elegido"></div>');
+    let prevT;
+    const updPrev = () => { clearTimeout(prevT); prevT = setTimeout(() => { const img = $('#bg-prev'); if (!img) return; V.png(S.pngBg === 'transparent' ? null : S.pngBg, blob => { if (!blob || !document.body.contains(img)) return; if (img.dataset.u) URL.revokeObjectURL(img.dataset.u); img.dataset.u = URL.createObjectURL(blob); img.src = img.dataset.u; }); }, 150); };
+    const setBg = bg => { S.pngBg = bg; store.set('wex-pngbg', bg); $$('#bgpick .bg-sw').forEach(b => b.classList.toggle('on', b.dataset.bg === bg)); const ci = $('#bg-custom'); if (ci && /^#[0-9a-fA-F]{6}$/.test(bg)) ci.value = bg; updPrev(); tick(); };
+    $$('#bgpick .bg-sw').forEach(b => b.onclick = () => setBg(b.dataset.bg));
+    $('#bg-custom').oninput = e => setBg(e.target.value);
+    updPrev();
     $$('#sheet-body [data-f]').forEach(b => b.onclick = () => {
       const n = nameNow(), name = S.cur.name || 'WEX', f = b.dataset.f; bump('dl');
       if (f === 'sdf') save(n + '.sdf', C.toSDF(m, name), 'chemical/x-mdl-sdfile'); else if (f === 'mol') save(n + '.mol', C.toMol(m, name), 'chemical/x-mdl-molfile'); else if (f === 'xyz') save(n + '.xyz', C.toXYZ(m, name), 'chemical/x-xyz');
       else if (f === 'json') { const d = C.descr(m); delete d.counts; save(n + '.json', JSON.stringify({ nombre: name, origen: KIND[S.sess.kind][0], smiles: C.toSmiles(m), datos: d, atomos: m.atoms.map(a => ({ el: a.el, x: +a.x.toFixed(4), y: +a.y.toFixed(4), z: +a.z.toFixed(4) })), enlaces: m.bonds }, null, 1), 'application/json'); }
-      else if (f === 'png') V.png('#0d1526', blob => save(n + '.png', blob));
+      else if (f === 'png') V.png(S.pngBg === 'transparent' ? null : S.pngBg, blob => save(n + '.png', blob));
       else navigator.share({ files: [new File([C.toSDF(m, name)], n + '.sdf', { type: 'chemical/x-mdl-sdfile' })], title: name }).catch(() => {});
       tick();
     });
@@ -475,12 +489,52 @@
     $('#prof-name').textContent = p.name;
     $('#prof-code').textContent = '#' + p.code;
     $('#prof-xp').textContent = P.xp + ' XP · nivel ' + level() + ' (' + lvName(level()) + ') · ' + MIS.filter(m => P.done[m.id]).length + '/' + MIS.length + ' retos';
+    // Avatar: foto redonda si hay una; si no, la inicial del nombre.
+    const av = $('#prof-avatar');
+    if (av) {
+      if (p.photo) av.innerHTML = '<img src="' + p.photo + '" alt="Foto de perfil de ' + esc(p.name) + '">';
+      else av.innerHTML = '<span id="prof-initial">' + esc((p.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
+    }
+    const bp = $('#prof-photo'); if (bp) bp.textContent = p.photo ? 'Cambiar foto de perfil' : 'Poner foto de perfil';
+    const del = $('#prof-photo-del'); if (del) del.hidden = !p.photo;
   }
+  // Foto de perfil (v0.8.2): se elige de la galería o la cámara, se comprime
+  // en el dispositivo (máx. 512 px, JPEG) y se guarda solo en localStorage
+  // (clave wex-profile, campo photo). Nunca se sube a ningún servidor: solo
+  // sale del dispositivo si el usuario exporta sus datos (el respaldo la
+  // incluye y pesa un poco más). Sin foto, se mantiene el avatar de inicial.
+  const PHOTO_MAX = 512;
+  $('#prof-photo').onclick = () => $('#file-photo').click();
+  $('#prof-photo-del').onclick = () => { const p = getProfile(); delete p.photo; store.set('wex-profile', p); renderProfile(); toast('Foto quitada'); tick(); };
+  $('#file-photo').addEventListener('change', e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    if (!f.type || !f.type.startsWith('image/')) return toast('Elige una imagen');
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const k = Math.min(1, PHOTO_MAX / Math.max(img.width, img.height)), w = Math.max(1, Math.round(img.width * k)), h = Math.max(1, Math.round(img.height * k));
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      cv.toBlob(b => {
+        if (!b) return toast('No se pudo procesar la foto');
+        const rd = new FileReader();
+        rd.onload = () => {
+          const p = getProfile(), old = p.photo; p.photo = rd.result;
+          if (!store.set('wex-profile', p)) { p.photo = old; if (!old) delete p.photo; renderProfile(); return toast('La foto no cabe en el almacenamiento de este dispositivo'); }
+          renderProfile(); toast('Foto guardada en este dispositivo · ' + Math.round(b.size / 1024) + ' KB');
+        };
+        rd.readAsDataURL(b);
+      }, 'image/jpeg', .85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); toast('No se pudo leer esa imagen'); };
+    img.src = url;
+  });
   function shareAchievements() {
     const p = getProfile();
     const payload = { v: 1, u: p.name, c: p.code, xp: P.xp, lvl: level(), done: MIS.filter(m => P.done[m.id]).map(m => m.id), disc: Object.keys(P.disc).length };
     const code = 'WEX1.' + b64u(payload);
-    openSheet('<h3>Compartir mis logros</h3><p class="muted small">Este código dice quién eres y cuántos retos llevas. No lleva tus moléculas ni tu historial. Quien lo reciba puede ver tus logros pegándolo en Ajustes → Ver logros de un código.</p><textarea class="sheet-in" id="sh-code" readonly rows="3" style="font-size:.8rem">' + code + '</textarea><div class="stack"><button class="sheet-btn" id="sh-copy" style="justify-content:center;background:var(--primary);color:var(--on);border-color:transparent">Copiar código</button></div>');
+    const av = p.photo ? '<img class="avatar sm" src="' + p.photo + '" alt="">' : '<span class="avatar sm">' + esc((p.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
+    openSheet('<h3>Compartir mis logros</h3><div class="prof-share-top">' + av + '<div><b>' + esc(p.name) + ' · #' + esc(p.code) + '</b><br><span class="muted small">' + P.xp + ' XP · nivel ' + level() + ' · ' + MIS.filter(m => P.done[m.id]).length + '/16 retos</span></div></div><p class="muted small">Este código dice quién eres y cuántos retos llevas. No lleva tus moléculas ni tu historial. Quien lo reciba puede ver tus logros pegándolo en Ajustes → Ver logros de un código.</p><textarea class="sheet-in" id="sh-code" readonly rows="3" style="font-size:.8rem">' + code + '</textarea><div class="stack"><button class="sheet-btn" id="sh-copy" style="justify-content:center;background:var(--primary);color:var(--on);border-color:transparent">Copiar código</button></div>');
     $('#sh-copy').onclick = async () => { try { await navigator.clipboard.writeText(code); toast('Código copiado'); } catch (e) { $('#sh-code').select(); document.execCommand('copy'); toast('Código copiado'); } };
   }
   function viewShareCode() {
@@ -504,7 +558,7 @@
     rd.onload = () => {
       let j; try { j = JSON.parse(rd.result); } catch (e) { return toast('Archivo no válido'); }
       if (j.app !== 'wex-molforge' || !j.prog) return toast('Ese archivo no es un respaldo de MolForge');
-      openSheet('<h3>Importar respaldo</h3><p class="muted small">Respaldo de <b>' + esc((j.profile && j.profile.name) || '?') + '</b> · ' + (j.prog.xp || 0) + ' XP · ' + (j.mine ? j.mine.length : 0) + ' moléculas guardadas · ' + (j.sugerencias ? j.sugerencias.length : 0) + ' sugerencias.</p><div class="stack"><button class="sheet-btn" id="im-merge">Fusionar con lo que tengo</button><button class="sheet-btn" id="im-repl">Reemplazar todo lo mío</button><button class="sheet-btn" id="im-no">Cancelar</button></div>');
+      openSheet('<h3>Importar respaldo</h3><p class="muted small">Respaldo de <b>' + esc((j.profile && j.profile.name) || '?') + '</b> · ' + (j.prog.xp || 0) + ' XP · ' + (j.mine ? j.mine.length : 0) + ' moléculas guardadas · ' + (j.sugerencias ? j.sugerencias.length : 0) + ' sugerencias' + (j.profile && j.profile.photo ? ' · con foto de perfil' : '') + '.</p><div class="stack"><button class="sheet-btn" id="im-merge">Fusionar con lo que tengo</button><button class="sheet-btn" id="im-repl">Reemplazar todo lo mío</button><button class="sheet-btn" id="im-no">Cancelar</button></div><p class="muted small">«Reemplazar» cambia también tu nombre, tu código y tu foto por los del respaldo; «Fusionar» conserva los tuyos (si no tienes foto y el respaldo trae una, se trae).</p>');
       $('#im-no').onclick = closeSheet;
       const apply = merge => {
         if (merge) {
@@ -515,6 +569,8 @@
           const haveM = new Set(S.mine.map(x => x.id)); (j.mine || []).forEach(x => { if (x.id && x.m && !haveM.has(x.id)) S.mine.push(x); });
           const haveH = new Set(S.hist.map(x => x.id)); (j.hist || []).forEach(x => { if (x.id && !haveH.has(x.id)) S.hist.push(x); });
           const haveS = new Set(S.sug.map(x => x.id)); (j.sugerencias || []).forEach(x => { if (x.id && x.titulo && !haveS.has(x.id)) S.sug.push(x); });
+          // Foto de perfil: al fusionar, solo se trae si aquí no hay ninguna.
+          if (j.profile && j.profile.photo && !getProfile().photo) { const p = getProfile(); p.photo = j.profile.photo; store.set('wex-profile', p); }
           S.hist.sort((a, b) => b.ts - a.ts); S.hist = S.hist.slice(0, 80);
         } else {
           Object.assign(P, { xp: j.prog.xp || 0, done: j.prog.done || {}, c: j.prog.c || {}, f: j.prog.f || {}, disc: j.prog.disc || {}, opened: j.prog.opened || {}, themes: j.prog.themes || {}, fams: j.prog.fams || {} });
@@ -552,7 +608,7 @@
   const saveSug = () => store.set('wex-sugerencias', S.sug);
   const sugById = id => S.sug.find(x => x.id === id);
   function sugText(s) { return '💡 Sugerencia para MolForge Pro: ' + s.titulo + '\n\n' + s.texto + '\n— ' + s.autor; }
-  function sugIssueUrl(s) { return SUG_REPO + '/issues/new?title=' + encodeURIComponent('[Sugerencia] ' + s.titulo) + '&body=' + encodeURIComponent(s.texto + '\n\nPropuesta desde MolForge Pro v0.8.1 · por ' + s.autor); }
+  function sugIssueUrl(s) { return SUG_REPO + '/issues/new?title=' + encodeURIComponent('[Sugerencia] ' + s.titulo) + '&body=' + encodeURIComponent(s.texto + '\n\nPropuesta desde MolForge Pro v0.8.2 · por ' + s.autor); }
   function renderSug() {
     const box = $('#sug-local-list'); if (!box) return;
     if (!S.sug.length) { box.innerHTML = '<p class="sug-empty">Aún no hay sugerencias en este dispositivo.<br>¡Escribe la primera idea arriba! Si la publicas en GitHub, la verá toda la comunidad.</p>'; return; }
@@ -633,5 +689,5 @@
     drawFams(); drawPalette(); saveMine(); V.setMol({ atoms: [], bonds: [] }); info(); selectTool('move'); seen.clear(); fixWide(); splash(100, 'Listo');
     setTimeout(() => { const s = $('#splash'); s.classList.add('out'); setTimeout(() => { s.remove(); GL.sync(); }, 600); }, Math.max(0, 900 - (performance.now() - t0)));
   })();
-  window.__wex = { S, P, V, openEntry, setMolecule, info, evaluate, GL, level, lvName, repairXP, finalUnlocked, getProfile, renderProfile, setManualH, renderOrbitales, showCelebration, MIS, renderSug, loadCommunity };
+  window.__wex = { S, P, V, openEntry, setMolecule, info, evaluate, GL, level, lvName, repairXP, finalUnlocked, getProfile, renderProfile, setManualH, renderOrbitales, showCelebration, MIS, renderSug, loadCommunity, pngBg: () => S.pngBg };
 })();

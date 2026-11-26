@@ -8,6 +8,11 @@ html[data-theme=cristal]{--bg:#140f33;--bg2:#1c1445;--fg:#f6f8ff;--muted:#cdd6f2
 html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 html[data-theme=cristal]::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(38% 38% at 18% 18%,oklch(62% .22 295/.8),#0000 70%),radial-gradient(34% 34% at 82% 24%,oklch(76% .14 195/.7),#0000 70%),radial-gradient(40% 40% at 64% 86%,oklch(68% .21 350/.55),#0000 70%),radial-gradient(30% 30% at 12% 82%,oklch(70% .16 150/.4),#0000 70%);filter:blur(30px);animation:drift 32s ease-in-out infinite alternate}
 html[data-theme=cristal]{background:#140f33}html[data-theme=cristal] body{background:transparent}
+/* fondos con más vida: halo de color suave detrás de todo (el body va
+   transparente para que se vea; igual que en el tema Cristal) */
+html[data-theme=oscuro]{background-image:radial-gradient(45% 35% at 12% 0%,rgba(45,212,191,.13),transparent 70%),radial-gradient(40% 35% at 92% 10%,rgba(59,130,246,.13),transparent 70%),radial-gradient(55% 40% at 50% 112%,rgba(139,92,246,.10),transparent 70%);background-attachment:fixed}
+html[data-theme=claro]{background-image:radial-gradient(45% 35% at 10% 0%,rgba(45,212,191,.17),transparent 70%),radial-gradient(40% 35% at 94% 8%,rgba(251,191,36,.15),transparent 70%),radial-gradient(55% 40% at 50% 112%,rgba(59,130,246,.13),transparent 70%);background-attachment:fixed}
+html[data-theme=oscuro] body,html[data-theme=claro] body{background:transparent}
 @keyframes drift{to{transform:translate3d(4%,-3%,0) rotate(8deg) scale(1.08)}}
 h1,h2,h3{margin:0;letter-spacing:-.01em}h3{font-size:.8rem;color:var(--muted);font-weight:600;margin:22px 4px 8px;text-transform:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;transition:transform .12s var(--ease),background-color .2s,color .2s,opacity .2s}
@@ -116,7 +121,25 @@ html[data-theme=cristal] #sheet{background:rgba(40,28,92,.78);-webkit-backdrop-f
 .final .lv-emblem{width:48px;height:48px}
 .final b{display:block}.final small{color:var(--muted)}
 .final .sheet-btn{justify-content:center}
-.prof{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.prof b{font-size:1.05rem}.prof span{font-size:.85rem}
+/* tarjeta de perfil (v0.8.2): avatar redondo a la izquierda, datos a la derecha */
+.prof-card{display:grid;gap:10px}
+.prof-top{display:flex;gap:14px;align-items:center}
+.avatar{width:72px;height:72px;border-radius:50%;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),#7c6cff);color:var(--on);font-size:1.9rem;font-weight:800;overflow:hidden;border:2px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+img.avatar{object-fit:cover}
+.avatar.sm{width:44px;height:44px;font-size:1.2rem}
+.prof-id{min-width:0}.prof-id b{display:block;font-size:1.1rem}.prof-id span{font-size:.85rem}
+.prof-id p{margin:4px 0 0}
+.prof-share-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.prof-share-top b{display:block}.prof-share-top>div{min-width:0}
+/* selector de fondo del PNG (v0.8.2) */
+.bgpick{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px}
+.bgpick .bg-sw{width:38px;height:38px;border-radius:50%;border:2px solid var(--border);flex:none;padding:0}
+.bgpick .bg-sw.on{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary)}
+.bg-custom{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:600}
+.bg-custom input[type=color]{width:38px;height:38px;padding:2px;border:1px solid var(--border);border-radius:50%;background:none;cursor:pointer}
+.bgprev{margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:conic-gradient(#cbd5e1 25%,#fff 0 50%,#cbd5e1 0 75%,#fff 0);background-size:16px 16px;min-height:120px;display:grid;place-items:center}
+.bgprev img{max-width:100%;display:block}
 .orb-sel{display:flex;align-items:center;gap:10px;min-width:0}.orb-sel span{font-weight:700;flex:none}.orb-sel select{flex:1 1 0;min-width:0;max-width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);font:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .orb-modes{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.orb-modes button{padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--fg);font:inherit;font-size:.88rem}
 .orb-modes button.on{border-color:var(--primary);background:var(--primary);color:var(--on)}
@@ -198,10 +221,23 @@ html[data-theme=cristal] #sheet.lg{background:linear-gradient(135deg,rgba(64,46,
 /* ===== NAVIDAD — quitar en enero ===== */
 .xmas-tree{display:none;font-size:1.35rem;line-height:1;align-self:flex-start;margin-top:4px}
 html.xmas .xmas-tree{display:inline}
+.xmas-greet{display:none;font-size:.72rem;padding:3px 9px;border-radius:99px;border:1px solid var(--border);color:var(--muted);align-self:flex-start;margin-top:6px;background:linear-gradient(135deg,rgba(220,38,38,.16),rgba(22,163,74,.16));white-space:nowrap}
+html.xmas .xmas-greet{display:inline-block}
+/* arbolito en el encabezado de las demás pestañas (Biblioteca ya tiene el suyo) */
+html.xmas #tab-retos .top h1::after,html.xmas #tab-orbitales .top h1::after,html.xmas #tab-ajustes .top h1::after{content:" 🎄";font-size:1.1rem}
+/* gorro de Santa en el logo de la pantalla de carga */
+html.xmas #splash h1{position:relative}
+html.xmas #splash h1::before{content:"🎅";position:absolute;left:-6px;top:-30px;font-size:1.5rem;transform:rotate(-14deg)}
 #xmas-snow{position:fixed;inset:0;z-index:40;pointer-events:none;overflow:hidden}
 #xmas-snow i{position:absolute;top:-12px;border-radius:50%;background:#fff;animation:xmas-fall linear infinite}
 @keyframes xmas-fall{to{transform:translateY(105vh) translateX(4vw)}}
-@media (prefers-reduced-motion:reduce){#xmas-snow{display:none}}
+/* guirnalda de luces en el borde superior */
+#xmas-garland{position:fixed;top:0;left:0;right:0;height:32px;z-index:41;pointer-events:none;overflow:hidden}
+#xmas-garland i{position:absolute;width:9px;height:9px;margin-left:-4px;border-radius:50%;animation:xmas-twinkle 1.4s ease-in-out infinite alternate}
+@keyframes xmas-twinkle{from{opacity:.45;box-shadow:0 0 2px currentColor}to{opacity:1;box-shadow:0 0 10px 2px currentColor}}
+@media (prefers-reduced-motion:reduce){#xmas-snow{display:none}#xmas-garland i{animation:none}}
+/* acento festivo discreto en la tarjeta de crear */
+html.xmas .hero{border-color:color-mix(in oklab,#dc2626 45%,var(--border))}
 /* ===== /NAVIDAD ===== */
 
 /* ===== buzón de sugerencias ===== */

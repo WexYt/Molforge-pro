@@ -1,7 +1,8 @@
 /* WEX MolForge Pro · navidad.js — decoración navideña ligera (MIT)
    NAVIDAD — quitar en enero: basta borrar este archivo, su <script> en
-   index.html, la clase .xmas-tree y el bloque "NAVIDAD" de app.css.
-   Sin dependencias. No toca nada de la v0.8. */
+   index.html, las clases .xmas-tree / .xmas-greet y el bloque "NAVIDAD" de
+   app.css (que incluye la guirnalda, el saludo y el arbolito en los
+   encabezados). Sin dependencias. No toca nada de la v0.8. */
 (function () {
   var KEY = 'wex-navidad';
   function stored() { try { var v = localStorage.getItem(KEY); return v === null ? null : JSON.parse(v); } catch (e) { return null; } }
@@ -30,10 +31,34 @@
     }
     document.body.appendChild(snowEl);
   }
+  // Guirnalda de luces en el borde superior: 18 focos de colores que
+  // cuelgan en curva y parpadean suave. Ligera: un solo div, sin canvas.
+  var garEl = null;
+  var BULBS = ['#ff5b5b', '#ffd166', '#7ee787', '#5eb1ff', '#c084fc'];
+  function buildGarland() {
+    if (garEl) return;
+    garEl = document.createElement('div');
+    garEl.id = 'xmas-garland';
+    garEl.setAttribute('aria-hidden', 'true');
+    var n = 18, i, b;
+    for (i = 0; i < n; i++) {
+      b = document.createElement('i');
+      b.style.left = (i / (n - 1) * 100).toFixed(2) + '%';
+      b.style.top = (3 + 11 * Math.sin(Math.PI * i / (n - 1))).toFixed(1) + 'px';
+      b.style.background = BULBS[i % BULBS.length];
+      b.style.color = BULBS[i % BULBS.length];
+      b.style.animationDelay = (Math.random() * 1.4).toFixed(2) + 's';
+      garEl.appendChild(b);
+    }
+    document.body.appendChild(garEl);
+  }
   function set(on) {
     document.documentElement.classList.toggle('xmas', !!on);
-    if (on) buildSnow();
-    else if (snowEl) { snowEl.remove(); snowEl = null; }
+    if (on) { buildSnow(); buildGarland(); }
+    else {
+      if (snowEl) { snowEl.remove(); snowEl = null; }
+      if (garEl) { garEl.remove(); garEl = null; }
+    }
   }
   set(isOn());
   window.__xmas = { isOn: isOn, set: set, defaultOn: defaultOn };

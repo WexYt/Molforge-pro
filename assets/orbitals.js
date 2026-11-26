@@ -35,7 +35,7 @@
   }
 
   function OrbView(cv) {
-    const ctx = cv.getContext('2d'); let W = 300, H = 300, dpr = 1, R = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], zoom = 1, Z = 6, mode = 'shells', variant = 'all', spin = true, t0 = performance.now(), dirty = true, drag = null, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ctx = cv.getContext('2d'); let W = 300, H = 300, dpr = 1, R = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], zoom = 1, Z = 6, mode = 'shells', variant = 'all', spin = true, t0 = performance.now(), dirty = true, drag = null, lastErr = '', reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const cache = {}, mm = (A, B) => A.map(r => [0, 1, 2].map(j => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
     const rot = (dx, dy) => { const ay = dx * .009, ax = dy * .009, cy = Math.cos(ay), sy = Math.sin(ay), cx = Math.cos(ax), sx = Math.sin(ax); R = mm([[1, 0, 0], [0, cx, -sx], [0, sx, cx]], mm([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]], R)); dirty = true; };
     rot(40, -30);
@@ -59,7 +59,7 @@
       shells(Z).forEach((n, i) => { if (n) ctx.fillText(SHELL[i] + ' · ' + n + ' e⁻', 12, H - 12 - (shells(Z).filter(Boolean).length - 1 - i) * 15); });
     }
     function drawOrbitals(t) {
-      const n = FN[mode].length, all = variant === 'all' && n > 1, list = all ? FN[mode].map((_, i) => i) : [variant], cols = all ? (n <= 3 ? n : n <= 5 ? 3 : 4) : 1, rows = all ? Math.ceil(n / cols) : 1, cw = W / cols, ch = H / rows;
+      const n = FN[mode].length, all = variant === 'all' && n > 1, list = all ? FN[mode].map((_, i) => i) : [variant === 'all' ? 0 : variant], cols = all ? (n <= 3 ? n : n <= 5 ? 3 : 4) : 1, rows = all ? Math.ceil(n / cols) : 1, cw = W / cols, ch = H / rows;
       const unit = (all ? Math.min(cw, ch) * .43 : Math.min(W, H) * .36) * zoom, sz = all ? Math.max(1.4, 1.6 * Math.sqrt(zoom)) : Math.max(1.8, 2.2 * Math.sqrt(zoom));
       list.forEach((i, idx) => {
         const row = Math.floor(idx / cols), len = Math.min(cols, n - row * cols), ox = all ? ((idx % cols) + .5 + (cols - len) / 2) * cw : W / 2, oy = all ? (row + .5) * ch - 8 : H / 2, key = mode + i, cl = cache[key] || (cache[key] = cloud(mode, i, 13 + i * 7));
@@ -73,7 +73,7 @@
     function frame(now) {
       const t = (now - t0) / 1000;
       if (spin && !drag && !reduce) { rot(.35, 0); } if (mode === 'shells' && !reduce) dirty = true;
-      if (dirty) { dirty = false; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); mode === 'shells' ? drawShells(t) : drawOrbitals(t); }
+      if (dirty) { dirty = false; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); try { mode === 'shells' ? drawShells(t) : drawOrbitals(t); } catch (err) { if (String(err) !== lastErr) { lastErr = String(err); console.error('[OrbView]', err); } } }
       requestAnimationFrame(frame);
     }
     cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY }; });
