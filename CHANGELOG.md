@@ -1,13 +1,5 @@
 # Historial de versiones
 
-## v0.7 beta — 2026-11-24
-- **logP estimado (Moriguchi, MLOGP)** en las reglas de fármaco; se muestra como estimación.
-- **Hidrógeno manual**: los H ya no se agregan solos; se pueden poner como átomos reales o plegar a conteos.
-- **XP corregido**: los 16 retos suman 950 XP y llevan al nivel 7, sin perder progreso al cargar.
-- **Logro final con orbitales 3D**: capas electrónicas y orbitales s, p, d y f (`assets/orbitals.js`).
-- **Perfil sin servidor**: usuario con código, compartir logros con código `WEX1.` o tarjeta PNG, y mover datos entre dispositivos con un archivo JSON.
-- **Para colaborar en GitHub**: plantillas de issues y de pull request, workflow de biblioteca y `.nojekyll` para GitHub Pages.
-
 ## v0.6 beta
 - **Tabla periódica completa** (118 elementos) en el laboratorio, con familias y tabla emergente.
 - **Historial** con fecha y hora y origen de cada molécula (creada, modificada, biblioteca o PubChem).

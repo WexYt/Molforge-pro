@@ -1,4 +1,4 @@
-# WEX MolForge Pro · v0.7 beta
+# WEX MolForge Pro · v0.6 beta
 Laboratorio molecular 3D para celular, tableta y escritorio (WEX Labs, licencia MIT). **Código abierto y editable** (HTML + JavaScript sin dependencias ni compilación).
 
 - **Laboratorio:** crea moléculas desde cero con enlaces simples, dobles y triples; arrastra los átomos para darles forma; la app reconoce sola el nombre y los elementos.
