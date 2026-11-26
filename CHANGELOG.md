@@ -1,5 +1,13 @@
 # Historial de versiones
 
+## v0.8.1 beta — 2026-11-26
+- **Barra inferior corregida**: las 5 pestañas (Biblioteca, Laboratorio, Retos, Orbitales, Ajustes) ya se ven completas en teléfonos angostos (360–400 px): etiquetas e iconos más chicos y texto con puntos suspensivos en vez de cortarse.
+- **Tarjeta de Logro final rehecha**: el texto ya no se corta a media palabra y el botón «Ver orbitales» va a ancho completo debajo del texto, en vez de apretarlo.
+- **Selector de Orbitales y botones sin cortes**: el selector de elemento ya no se desborda y los botones de la fila de Retos tampoco.
+- **Interruptor de hidrógenos coherente**: con hidrógeno manual prendido, «Mostrar hidrógenos» se ve apagado y deshabilitado, su descripción dice que no tiene efecto y la nota solo aparece cuando el modo manual está prendido de verdad.
+- **Decoración navideña** 🎄: nieve ligera y un arbolito en el encabezado, con interruptor en Ajustes (prendida por defecto en diciembre, se puede apagar). Respeta `prefers-reduced-motion`. Código aislado para quitarlo en enero.
+- **Buzón de sugerencias** (Ajustes): publica ideas que se guardan en el dispositivo y viajan con la exportación/importación de datos; vota con ⭐ (un voto por dispositivo, se quita tocando de nuevo), comenta para apoyar, comparte como texto o publícala en GitHub como Issue. La lista de la comunidad lee los Issues abiertos del repo (solo lectura, sin token) con sus reacciones y comentarios; sin internet muestra el buzón local con una nota clara. Sin servidor: los votos locales no se comparten.
+
 ## v0.8 beta
 - **logP estimado (Moriguchi)**: visible en Datos junto a la fórmula y la masa, y usado como criterio en las reglas de fármaco. Es una estimación (error típico ~0.5 unidades), no un valor medido.
 - **8.ª regla de fármaco: Pfizer 3/75** (logP > 3 y TPSA < 75 → mayor riesgo de toxicidad in vivo). Lipinski, Egan, Muegge y Ghose ahora también usan el logP.

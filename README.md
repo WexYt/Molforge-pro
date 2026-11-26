@@ -1,4 +1,4 @@
-# WEX MolForge Pro · v0.8 beta
+# WEX MolForge Pro · v0.8.1 beta
 Laboratorio molecular 3D para celular, tableta y escritorio (WEX Labs, licencia MIT). **Código abierto y editable** (HTML + JavaScript sin dependencias ni compilación).
 
 - **Laboratorio:** crea moléculas desde cero con enlaces simples, dobles y triples; arrastra los átomos para darles forma; la app reconoce sola el nombre y los elementos.
@@ -9,6 +9,7 @@ Laboratorio molecular 3D para celular, tableta y escritorio (WEX Labs, licencia 
 - **Retos y desbloqueos:** niveles con emblemas, 16 misiones y compuestos que se abren al cumplirlas. Al completar las 16 (950 XP) se desbloquea el logro final: capas de electrones y orbitales 3D s, p, d y f.
 - **Reglas de fármaco:** Lipinski, Veber, Egan, Muegge, Oprea, regla de 3, Ghose y Pfizer 3/75, con **logP estimado (Moriguchi)** visible en Datos.
 - **Hidrógeno manual** (Ajustes): los H se añaden a mano en vez de completarse solos por valencia.
+- **Buzón de sugerencias** (Ajustes): propón ideas, vota con ⭐, comenta y publícalas en GitHub; la comunidad se lee desde los Issues del repo. **Decoración navideña** con interruptor (prendida en diciembre).
 - **Mi perfil** (Ajustes): nombre y código único en el dispositivo; compartir logros con un código `WEX1.…` y exportar/importar todos los datos a otro dispositivo.
 - **Tres temas:** Claro, Oscuro y Cristal líquido (con refracción real en Chromium). **Modo escritorio** de tres paneles. **Sin conexión** (app instalable).
 

@@ -56,7 +56,7 @@
 
 <main id="app">
   <section id="tab-explorar" class="tab on" aria-label="Biblioteca">
-    <header class="top"><div><h1 id="exp-title">Biblioteca</h1><p id="count" class="muted"></p></div><span class="pill">v0.8 beta</span></header>
+    <header class="top"><div><h1 id="exp-title">Biblioteca</h1><p id="count" class="muted"></p></div><span class="xmas-tree" aria-hidden="true">🎄</span><span class="pill">v0.8.1 beta</span></header>
     <div class="seg" id="seg" role="tablist" aria-label="Vista">
       <button role="tab" data-sub="lib" aria-selected="true">Biblioteca</button>
       <button role="tab" data-sub="mine" aria-selected="false">Mis moléculas <b id="n-mine"></b></button>
@@ -156,6 +156,7 @@
       <label class="sw-row"><span>Buscar nombre en PubChem<small>Si hay internet, identifica estructuras nuevas.</small></span><input type="checkbox" id="st-online" checked></label>
       <label class="sw-row"><span>Vibración suave<small>Al colocar átomos y enlaces.</small></span><input type="checkbox" id="st-haptic" checked></label>
       <label class="sw-row"><span>Hidrógeno manual<small>Los H se añaden a mano; no se completan solos por valencia.</small></span><input type="checkbox" id="st-manual-h"></label>
+      <label class="sw-row"><span>Decoración navideña<small>Nieve ligera y un arbolito en el encabezado. Prendida en diciembre.</small></span><input type="checkbox" id="st-navidad"></label>
     </div>
     <h3>Mi perfil</h3>
     <div class="card">
@@ -170,12 +171,31 @@
         <button class="sheet-btn" id="prof-import">Importar datos de otro dispositivo</button>
       </div>
     </div>
+    <h3>Buzón de sugerencias</h3>
+    <div class="card">
+      <p class="muted small">¿Qué le falta a MolForge? Propón una idea: se guarda <b>en este dispositivo</b> y viaja contigo cuando exportas tus datos. Sin servidor, tus votos y comentarios locales solo los ves tú: los votos de verdad se hacen en GitHub.</p>
+      <form id="sug-form" class="sug-form">
+        <input class="sheet-in" id="sug-title" maxlength="80" placeholder="Título de tu idea" required>
+        <textarea class="sheet-in" id="sug-text" rows="3" maxlength="500" placeholder="Cuéntanos tu idea…" required></textarea>
+        <button class="sheet-btn" type="submit" style="justify-content:center;background:var(--primary);color:var(--on);border-color:transparent">Publicar sugerencia</button>
+      </form>
+      <div id="sug-local-list" class="sug-list"></div>
+    </div>
+    <h3>Comunidad en GitHub</h3>
+    <div class="card">
+      <p class="muted small" id="sug-comm-note">Cargando sugerencias de la comunidad…</p>
+      <div id="sug-comm-list" class="sug-list"></div>
+      <div class="stack">
+        <button class="sheet-btn" id="sug-comm-open">Ver sugerencias de la comunidad</button>
+        <button class="sheet-btn" id="sug-comm-refresh">Actualizar lista</button>
+      </div>
+    </div>
     <h3>Datos</h3>
     <div class="card"><div class="stack"><button class="sheet-btn" id="st-clear-hist">Borrar el historial</button><button class="sheet-btn danger" id="st-reset">Reiniciar retos y descubrimientos</button></div></div>
     <h3>Sin conexión</h3>
     <div class="card"><p id="offline-state" class="muted">Comprobando…</p><button id="btn-install" class="btn" hidden>Instalar como app</button></div>
     <h3>Acerca de</h3>
-    <div class="card muted small"><p><b>WEX MolForge Pro v0.8 beta</b> · licencia MIT. Datos de PubChem (NIH, dominio público) y RCSB PDB.</p><p>Nuevo en 0.8: logP estimado (Moriguchi), hidrógeno manual, perfil con usuario único y traspaso de datos, emblemas de nivel, y el logro final: capas de electrones y orbitales 3D s, p, d y f.</p><p>Código abierto: cualquiera puede colaborar desde GitHub (ver <i>CONTRIBUTING.md</i>).</p></div>
+    <div class="card muted small"><p><b>WEX MolForge Pro v0.8.1 beta</b> · licencia MIT. Datos de PubChem (NIH, dominio público) y RCSB PDB.</p><p>Nuevo en 0.8.1: barra inferior y tarjeta de Logro final corregidas, interruptor de hidrógenos coherente, decoración navideña con interruptor y buzón de sugerencias (local + comunidad en GitHub).</p><p>Nuevo en 0.8: logP estimado (Moriguchi), hidrógeno manual, perfil con usuario único y traspaso de datos, emblemas de nivel, y el logro final: capas de electrones y orbitales 3D s, p, d y f.</p><p>Código abierto: cualquiera puede colaborar desde GitHub (ver <i>CONTRIBUTING.md</i>).</p></div>
   </section>
   <aside id="inspector" aria-label="Datos y reglas"><div class="insp-h"><b>Datos</b><span class="muted small" id="insp-name"></span></div><div id="insp-data"></div><div class="insp-h"><b>Reglas</b></div><div id="insp-rules"></div></aside>
 </main>
@@ -200,6 +220,7 @@
 <script src="assets/view.js"></script>
 <script src="assets/orbitals.js"></script>
 <script src="assets/liquid-glass.js"></script>
+<script src="assets/navidad.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /* WEX MolForge Pro · service worker: todo disponible sin conexión (stale-while-revalidate) */
-const V = 'wex-molforge-v8';
-const CORE = ['./', 'index.html', 'manifest.webmanifest', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'assets/app.css', 'assets/elementos.js', 'assets/chem.js', 'assets/liquid-glass.js', 'assets/view.js', 'assets/orbitals.js', 'assets/app.js', 'assets/biblioteca.json'];
+const V = 'wex-molforge-v9';
+const CORE = ['./', 'index.html', 'manifest.webmanifest', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'assets/app.css', 'assets/elementos.js', 'assets/chem.js', 'assets/liquid-glass.js', 'assets/view.js', 'assets/orbitals.js', 'assets/navidad.js', 'assets/app.js', 'assets/biblioteca.json'];
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => c.addAll(CORE)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {
