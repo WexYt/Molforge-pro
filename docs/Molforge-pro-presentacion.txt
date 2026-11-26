@@ -1,4 +1,4 @@
-WEX MolForge Pro · v0.8.1 beta
+WEX MolForge Pro · v0.8.2 beta
 Laboratorio molecular 3D para tu bolsillo
 WEX Labs · Código abierto · Licencia MIT
 26 de noviembre de 2026
@@ -64,6 +64,30 @@ Cuatro pasos.
    tus logros con un código.
 
 ============================================================
+LO NUEVO EN LA VERSIÓN 0.8.2 BETA
+============================================================
+- Orbitales arreglados: al tocar «Orbital s» el visor se
+  quedaba vacío para siempre. Ahora cada variante muestra
+  su forma visible (1 s, 3 p, 5 d, 7 f) en los 118
+  elementos, y el botón «Todos» ya no aparece cuando el
+  modo solo tiene una variante.
+- Color de fondo al descargar en PNG: 10 colores listos,
+  transparente o un color propio, con vista previa. El
+  PNG se guarda con el fondo que elijas y la elección se
+  guarda en tu dispositivo.
+- Foto de perfil (Ajustes → Mi perfil): elige de la
+  galería o la cámara; se comprime en tu dispositivo
+  (máx. 512 px) y se ve como avatar redondo en tu perfil
+  y al compartir logros. Se puede cambiar o quitar, y
+  nunca sale de tu dispositivo salvo que exportes tus
+  datos.
+- Más Navidad: guirnalda de luces, saludo «¡Felices
+  fiestas!», arbolito en los títulos y gorro de Santa en
+  el logo. Mismo interruptor en Ajustes.
+- Pulido visual: halo sutil en los 3 temas y tarjeta de
+  perfil rediseñada alrededor de la foto.
+
+============================================================
 LO NUEVO EN LA VERSIÓN 0.8.1 BETA
 ============================================================
 - Errores de pantalla corregidos: la barra inferior ya
@@ -107,7 +131,7 @@ LO NUEVO EN LA VERSIÓN 0.8 BETA
   se desbloquean las capas de electrones y los orbitales 3D.
 
 ============================================================
-LO QUE INCLUYE HOY (v0.8.1 beta)
+LO QUE INCLUYE HOY (v0.8.2 beta)
 ============================================================
   118  elementos de la tabla periódica
   242  compuestos (226 + 16 por desbloquear)
@@ -165,9 +189,9 @@ Archivos principales:
   chem.js       motor químico (fórmula, logP, reglas, SMILES)
   view.js       visor 3D táctil
   orbitals.js   capas de electrones y orbitales s/p/d/f
-  navidad.js    nieve y arbolito (se quita en enero)
+  navidad.js    nieve, guirnalda y arbolito (se quita en enero)
   app.js        interfaz, retos, perfil, buzón y orbitales
-Unas 2 100 líneas de código en total · licencia MIT.
+2 208 líneas de código en total · licencia MIT.
 
 ============================================================
 ALCANCE: HASTA DÓNDE PUEDE LLEGAR
