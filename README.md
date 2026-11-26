@@ -1,4 +1,4 @@
-# WEX MolForge Pro · v0.8.1 beta
+# WEX MolForge Pro · v0.8.2 beta
 Laboratorio molecular 3D para celular, tableta y escritorio (WEX Labs, licencia MIT). **Código abierto y editable** (HTML + JavaScript sin dependencias ni compilación).
 
 - **Laboratorio:** crea moléculas desde cero con enlaces simples, dobles y triples; arrastra los átomos para darles forma; la app reconoce sola el nombre y los elementos.
@@ -10,7 +10,8 @@ Laboratorio molecular 3D para celular, tableta y escritorio (WEX Labs, licencia 
 - **Reglas de fármaco:** Lipinski, Veber, Egan, Muegge, Oprea, regla de 3, Ghose y Pfizer 3/75, con **logP estimado (Moriguchi)** visible en Datos.
 - **Hidrógeno manual** (Ajustes): los H se añaden a mano en vez de completarse solos por valencia.
 - **Buzón de sugerencias** (Ajustes): propón ideas, vota con ⭐, comenta y publícalas en GitHub; la comunidad se lee desde los Issues del repo. **Decoración navideña** con interruptor (prendida en diciembre).
-- **Mi perfil** (Ajustes): nombre y código único en el dispositivo; compartir logros con un código `WEX1.…` y exportar/importar todos los datos a otro dispositivo.
+- **Mi perfil** (Ajustes): nombre y código único en el dispositivo; compartir logros con un código `WEX1.…` y exportar/importar todos los datos a otro dispositivo. **Foto de perfil** redonda, solo en tu dispositivo.
+- **Descarga con color de fondo**: elige el fondo del PNG (10 colores, transparente o color propio) con vista previa. **Orbitales arreglados** (todas las variantes muestran su forma) y **más Navidad** (guirnalda, saludo y gorro de Santa).
 - **Tres temas:** Claro, Oscuro y Cristal líquido (con refracción real en Chromium). **Modo escritorio** de tres paneles. **Sin conexión** (app instalable).
 
 ## Inicio rápido

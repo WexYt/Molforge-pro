@@ -1,5 +1,12 @@
 # Historial de versiones
 
+## v0.8.2 beta — 2026-11-26
+- **Orbitales arreglados**: al tocar «Orbital s» (y al cambiar de variante) la app se rompía y el visor quedaba vacío para siempre. Causa: la variante «all» se usaba como índice en un orbital de una sola variante y el ciclo de render moría tras el error. Ahora cada variante seleccionable muestra su forma visible (1 s; 3 p; 5 d; 7 f) y el botón «Todos» se oculta cuando el modo solo tiene una variante.
+- **Color de fondo al descargar en PNG** (hoja Descargar): 10 colores listos + transparente + color propio, con vista previa; el PNG exportado usa el fondo elegido y la elección se guarda en el dispositivo.
+- **Foto de perfil** (Ajustes → Mi perfil): elige de la galería o la cámara; se comprime en el dispositivo (máx. 512 px, JPEG 0.85), se ve como avatar redondo en el perfil y al compartir, se puede cambiar o quitar, y nunca sale del dispositivo salvo al exportar tus datos.
+- **Más Navidad** 🎄: guirnalda de 18 focos, saludo «¡Felices fiestas!», arbolito en los títulos y gorro de Santa en el logo; mismo interruptor en Ajustes, respeta `prefers-reduced-motion`, código aislado para quitarlo en enero.
+- **Pulido visual**: halo radial sutil en los 3 temas (Claro, Oscuro, Cristal) y tarjeta de perfil rediseñada alrededor de la foto.
+
 ## v0.8.1 beta — 2026-11-26
 - **Barra inferior corregida**: las 5 pestañas (Biblioteca, Laboratorio, Retos, Orbitales, Ajustes) ya se ven completas en teléfonos angostos (360–400 px): etiquetas e iconos más chicos y texto con puntos suspensivos en vez de cortarse.
 - **Tarjeta de Logro final rehecha**: el texto ya no se corta a media palabra y el botón «Ver orbitales» va a ancho completo debajo del texto, en vez de apretarlo.
