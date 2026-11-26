@@ -1,4 +1,4 @@
-WEX MolForge Pro · v0.8 beta
+WEX MolForge Pro · v0.8.1 beta
 Laboratorio molecular 3D para tu bolsillo
 WEX Labs · Código abierto · Licencia MIT
 26 de noviembre de 2026
@@ -64,6 +64,26 @@ Cuatro pasos.
    tus logros con un código.
 
 ============================================================
+LO NUEVO EN LA VERSIÓN 0.8.1 BETA
+============================================================
+- Errores de pantalla corregidos: la barra inferior ya
+  muestra las 5 pestañas completas en teléfonos angostos,
+  la tarjeta del Logro final se lee entera y el selector
+  de Orbitales ya no se desborda.
+- Interruptor de hidrógenos coherente: con hidrógeno
+  manual prendido, «Mostrar hidrógenos» se ve apagado y
+  no tiene efecto; la nota solo aparece cuando el modo
+  manual está prendido de verdad.
+- Decoración navideña: nieve ligera y un arbolito en el
+  encabezado, con interruptor en Ajustes (prendida por
+  defecto en diciembre, se puede apagar).
+- Buzón de sugerencias (en Ajustes): propón ideas, vota
+  con ⭐, comenta y comparte; también puedes publicarlas
+  en GitHub y ver las sugerencias de la comunidad. Sin
+  servidor: las ideas y los votos locales viven en tu
+  dispositivo y viajan con tu respaldo de datos.
+
+============================================================
 LO NUEVO EN LA VERSIÓN 0.8 BETA
 ============================================================
 - logP estimado (método de Moriguchi): se ve en Datos junto
@@ -87,7 +107,7 @@ LO NUEVO EN LA VERSIÓN 0.8 BETA
   se desbloquean las capas de electrones y los orbitales 3D.
 
 ============================================================
-LO QUE INCLUYE HOY (v0.8 beta)
+LO QUE INCLUYE HOY (v0.8.1 beta)
 ============================================================
   118  elementos de la tabla periódica
   242  compuestos (226 + 16 por desbloquear)
@@ -97,8 +117,8 @@ LO QUE INCLUYE HOY (v0.8 beta)
 
 Más: historial con fecha y origen, biblioteca del
 dispositivo, retos y niveles, perfil para compartir logros
-y paso de datos entre dispositivos, modo tableta y
-escritorio con las mismas funciones.
+y paso de datos entre dispositivos, buzón de sugerencias,
+modo tableta y escritorio con las mismas funciones.
 
 ============================================================
 RETOS Y DESBLOQUEOS
@@ -145,8 +165,9 @@ Archivos principales:
   chem.js       motor químico (fórmula, logP, reglas, SMILES)
   view.js       visor 3D táctil
   orbitals.js   capas de electrones y orbitales s/p/d/f
-  app.js        interfaz, retos, perfil y orbitales
-Unas 1 900 líneas de código en total · licencia MIT.
+  navidad.js    nieve y arbolito (se quita en enero)
+  app.js        interfaz, retos, perfil, buzón y orbitales
+Unas 2 100 líneas de código en total · licencia MIT.
 
 ============================================================
 ALCANCE: HASTA DÓNDE PUEDE LLEGAR
@@ -193,4 +214,5 @@ PRUÉBALA Y COLABORA
   github.com/WexYt/Molforge-pro
   Licencia MIT · Datos: PubChem (NIH, dominio público)
 
-Agrega una molécula, un reto o una idea: abre un Pull Request.
+Agrega una molécula, un reto o una idea: abre un Pull Request
+o deja tu sugerencia en el buzón de la app (Ajustes).
